@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacy Policy — ZeroInstall Shield (zeroinstall.app)</title>
+    <link rel="canonical" href="https://zeroinstall.app/privacy.html" />
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #090d16;
+            color: #e2e8f0;
+            line-height: 1.7;
+            padding: 48px 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #131b2e;
+            border: 1px solid #1e293b;
+            border-radius: 16px;
+            padding: 36px;
+        }
+        h1, h2 {
+            color: #ffffff;
+        }
+        h2 {
+            margin-top: 28px;
+            font-size: 1.25rem;
+        }
+        p, li {
+            color: #cbd5e1;
+        }
+        a {
+            color: #38bdf8;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Privacy Policy — ZeroInstall Shield</h1>
+    <p><strong>Official Website:</strong> <a href="https://zeroinstall.app">https://zeroinstall.app</a><br />
+    <strong>Effective Date:</strong> October 17, 2026</p>
+
+    <p>
+        <strong>ZeroInstall Shield</strong> ("the App") is built with a strict <strong>100% On-Device Privacy Architecture</strong>. We do not collect, transmit, store, or sell your personal data on any external server.
+    </p>
+
+    <h2>1. How Permissions Are Used Locally on Your Device</h2>
+    <ul>
+        <li><strong>Query All Packages (<code>QUERY_ALL_PACKAGES</code>):</strong> Used strictly on-device to scan installed applications for invisible ("ghost") apps without launcher icons, sideloaded APKs, and stalkerware permissions. Installed app lists never leave your device.</li>
+        <li><strong>Accessibility Service (<code>BIND_ACCESSIBILITY_SERVICE</code>):</strong> Used solely to detect unauthorized Android Package Installer prompts and "Install Unknown Apps" permission screens in real time so the App can automatically cancel unauthorized APK installations when Lockdown Mode is enabled. We never read, log, or transmit personal screen text or passwords.</li>
+        <li><strong>Notification Listener (<code>BIND_NOTIFICATION_LISTENER_SERVICE</code>):</strong> Used locally to inspect incoming notification URLs for malicious <code>.apk</code> payloads or phishing links. Message contents are processed in memory and are never saved or uploaded anywhere.</li>
+        <li><strong>VPN Service (<code>BIND_VPN_SERVICE</code>):</strong> Used as a local loopback on-device DNS sinkhole firewall to block connections to known spyware and stalkerware domains. Your internet traffic is never routed through any external VPN server.</li>
+        <li><strong>Usage &amp; Network Stats (<code>PACKAGE_USAGE_STATS</code>):</strong> Used locally to display per-app upload (TX) and download (RX) data usage and alert you to suspicious background data exfiltration.</li>
+        <li><strong>Device Administrator (<code>BIND_DEVICE_ADMIN</code>):</strong> Used strictly at your request to prevent malware from silently uninstalling ZeroInstall Shield and to enforce OS-level restrictions against unknown APK sources.</li>
+    </ul>
+
+    <h2>2. Zero Data Collection or Sharing</h2>
+    <p>
+        We do not require user registration, do not track your browsing history, and do not share any data with third parties or advertisers.
+    </p>
+
+    <h2>3. Contact</h2>
+    <p>
+        If you have any questions about this Privacy Policy, you may contact us at <strong>support@zeroinstall.app</strong> or via our official Google Play Store listing.
+    </p>
+
+    <p style="margin-top: 32px;">
+        <a href="index.html">← Back to ZeroInstall.app Home</a>
+    </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ZeroInstall — Stop Unauthorized APK Installs, Hidden Ghost Apps & Spyware Links</title>
+    <meta name="description" content="ZeroInstall (zeroinstall.app) protects your Android phone from unauthorized APK installations, silent background trackers, WhatsApp/SMS phishing links, invisible ghost apps, bank screen-share scams, and secret background data uploads." />
+    <link rel="canonical" href="https://zeroinstall.app/" />
+
+    <!-- OpenGraph / WhatsApp / Social Preview Tags for zeroinstall.app -->
+    <meta property="og:title" content="ZeroInstall — Android APK Lockdown & Anti-Stealth Guard" />
+    <meta property="og:description" content="Zero unauthorized APK installs. Stop silent background trackers, WhatsApp APK scams, invisible ghost apps, and secret data uploads." />
+    <meta property="og:url" content="https://zeroinstall.app/" />
+    <meta property="og:type" content="website" />
+
+    <style>
+        :root {
+            --bg-dark: #090d16;
+            --bg-card: #131b2e;
+            --bg-card-hover: #19233c;
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.35);
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-amber: #f59e0b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #1e293b;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        .container {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(9, 13, 22, 0.88);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 72px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 1.25rem;
+            letter-spacing: -0.02em;
+        }
+        .logo-badge {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #2563eb, #06b6d4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        .domain-tag {
+            font-size: 0.75rem;
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.12);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+        .nav-links a:hover {
+            color: #fff;
+        }
+        .play-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            font-weight: 700;
+            padding: 12px 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .play-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(16, 185, 129, 0.45);
+        }
+        .hero {
+            padding: 84px 0 64px;
+            text-align: center;
+            background: radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.22), transparent 65%);
+        }
+        .pill {
+            display: inline-block;
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            color: #60a5fa;
+            font-size: 0.82rem;
+            font-weight: 700;
+            padding: 6px 16px;
+            border-radius: 999px;
+            margin-bottom: 20px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .hero h1 {
+            font-size: clamp(2.1rem, 5vw, 3.5rem);
+            font-weight: 900;
+            line-height: 1.15;
+            max-width: 850px;
+            margin: 0 auto 20px;
+        }
+        .hero h1 span {
+            background: linear-gradient(90deg, #38bdf8, #3b82f6, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero p {
+            color: var(--text-muted);
+            font-size: 1.15rem;
+            max-width: 680px;
+            margin: 0 auto 36px;
+        }
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 16px;
+        }
+        .secondary-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            font-weight: 600;
+            padding: 12px 24px;
+            border-radius: 12px;
+        }
+        .section {
+            padding: 72px 0;
+        }
+        .section-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        .section-header h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+        .section-header p {
+            color: var(--text-muted);
+            max-width: 640px;
+            margin: 0 auto;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+            gap: 24px;
+        }
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 28px;
+            transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+        .card:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+        }
+        .card-icon {
+            font-size: 1.9rem;
+            margin-bottom: 14px;
+        }
+        .card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        .card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+        /* Fair Regional Pricing Grid */
+        .pricing-table {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-top: 28px;
+        }
+        .price-card {
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+        }
+        .price-card .country {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+        .price-card .amount {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #34d399;
+            margin: 8px 0 4px;
+        }
+        .price-card .badge {
+            font-size: 0.75rem;
+            color: #60a5fa;
+        }
+        .scanner-box {
+            background: linear-gradient(145deg, #131b2e, #0f172a);
+            border: 1px solid #2563eb;
+            border-radius: 20px;
+            padding: 36px;
+            max-width: 780px;
+            margin: 0 auto;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+        }
+        .input-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 18px;
+            flex-wrap: wrap;
+        }
+        .input-row input {
+            flex: 1;
+            min-width: 240px;
+            background: #090d16;
+            border: 1px solid #334155;
+            color: #fff;
+            padding: 14px 16px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+        }
+        .input-row button {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .sample-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+        }
+        .chip {
+            font-size: 0.78rem;
+            background: #1e293b;
+            color: #93c5fd;
+            padding: 5px 12px;
+            border-radius: 999px;
+            cursor: pointer;
+        }
+        .scan-output {
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 12px;
+            display: none;
+        }
+        .cta-banner {
+            background: linear-gradient(135deg, #1e3a8a, #0f172a);
+            border: 1px solid #3b82f6;
+            border-radius: 24px;
+            padding: 48px 32px;
+            text-align: center;
+            margin: 48px 0;
+        }
+        footer {
+            border-top: 1px solid var(--border-color);
+            padding: 36px 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container nav">
+        <div class="logo">
+            <div class="logo-badge">🛡️</div>
+            <span>ZeroInstall</span>
+            <span class="domain-tag">.app</span>
+        </div>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#fair-pricing">Fair Pricing</a>
+            <a href="#link-scanner">Link Scanner</a>
+            <a href="privacy.html">Privacy Policy</a>
+            <a class="play-btn" href="https://play.google.com/store/apps/details?id=com.security.apkshield" target="_blank" rel="noopener">
+                ▶ Get it on Google Play
+            </a>
+        </div>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container">
+        <span class="pill">ZeroInstall.app • Google Play Compliant Android Security</span>
+        <h1>Zero Unauthorized <span>APK Installs, Hidden Trackers</span> &amp; Secret Data Theft</h1>
+        <p>
+            ZeroInstall stops silent background APK installations, blocks malicious WhatsApp &amp; SMS links, detects Bank Screen-Share scams (AnyDesk/TeamViewer), uncovers invisible "ghost" apps, and shows which apps are secretly uploading your personal data.
+        </p>
+        <div class="hero-actions">
+            <a class="play-btn" href="https://play.google.com/store/apps/details?id=com.security.apkshield" target="_blank" rel="noopener">
+                ▶ Download Free on Google Play
+            </a>
+            <a class="secondary-btn" href="#link-scanner">
+                🔍 Test Suspicious Link Below
+            </a>
+        </div>
+    </div>
+</section>
+
+<section id="features" class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2>6 People-First Security Layers</h2>
+            <p>Built strictly to Google Play Store privacy guidelines—100% of scanning happens locally on your phone.</p>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <div class="card-icon">🛑</div>
+                <h3>1. Instant APK Install Blocker</h3>
+                <p>Detects unauthorized Android Package Installer prompts and "Install Unknown Apps" settings screens in real time, stopping accidental or drive-by APK installations.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">⚡</div>
+                <h3>2. Silent Background Session Guard</h3>
+                <p>Hooks into Android's <code>PackageInstaller.SessionCallback</code> and <code>DownloadManager</code> to catch stealth background APK installation sessions the moment they start.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">👻</div>
+                <h3>3. Invisible "Ghost App" Detector</h3>
+                <p>Uncovers spyware and stalkerware apps that install without a launcher icon or use blank invisible names to hide in the background, with 1-tap Uninstall.</p>
+            </div>
+
+            <div class="card" id="data-spy">
+                <div class="card-icon">📊</div>
+                <h3>4. Upload, Download &amp; Data Theft Spy</h3>
+                <p>Displays exact Upload (TX) and Download (RX) data per app, tracks background uploads while your screen is off, and flags apps taking your SMS, Contacts, Mic, or Photos.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">💬</div>
+                <h3>5. WhatsApp, SMS &amp; Telegram Link Guard</h3>
+                <p>Scans incoming message notifications for hidden <code>.apk</code> payloads, <code>intent://</code> exploits, and redirect droppers before you even tap the link.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">🏦</div>
+                <h3>6. Bank Call &amp; Screen-Share Scam Guard</h3>
+                <p>Alerts you immediately if remote screen-control apps (AnyDesk, TeamViewer, RustDesk, AirDroid) used by banking/OTP phone scammers are installed on your phone, plus checks for Wi-Fi MITM proxies.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="fair-pricing" class="section" style="background: rgba(19, 27, 46, 0.5);">
+    <div class="container">
+        <div class="section-header">
+            <h2>🌍 Fair Regional Pricing for Every Nation</h2>
+            <p>
+                Security is a basic human right. Core APK Lockdown &amp; Ghost App Scanning are <strong>100% FREE forever</strong>. For optional 24/7 Pro features, Google Play automatically adjusts pricing based on your country's local per-capita income:
+            </p>
+        </div>
+
+        <div class="pricing-table">
+            <div class="price-card">
+                <div class="country">🇮🇳 India</div>
+                <div class="amount">₹29 / mo</div>
+                <div class="badge">or ₹199/yr (80% PPP Reduction)</div>
+            </div>
+            <div class="price-card">
+                <div class="country">🇮🇩 Indonesia</div>
+                <div class="amount">Rp 9,000 / mo</div>
+                <div class="badge">75% PPP Income Adjustment</div>
+            </div>
+            <div class="price-card">
+                <div class="country">🇳🇬 Nigeria</div>
+                <div class="amount">₦400 / mo</div>
+                <div class="badge">85% PPP Income Adjustment</div>
+            </div>
+            <div class="price-card">
+                <div class="country">🇧🇩 Bangladesh / 🇵🇰 Pakistan</div>
+                <div class="amount">৳40 / Rs 90</div>
+                <div class="badge">85% PPP Income Adjustment</div>
+            </div>
+            <div class="price-card">
+                <div class="country">🇵🇭 Philippines / 🇻🇳 Vietnam</div>
+                <div class="amount">₱29 / 12K ₫</div>
+                <div class="badge">75% PPP Income Adjustment</div>
+            </div>
+            <div class="price-card">
+                <div class="country">🇧🇷 Brazil / 🇲🇽 Mexico</div>
+                <div class="amount">R$ 4,90 / MX$ 19</div>
+                <div class="badge">60% PPP Income Adjustment</div>
+            </div>
+            <div class="price-card">
+                <div class="country">🇺🇸 US / 🇬🇧 UK / 🇪🇺 EU</div>
+                <div class="amount">$1.49 / mo</div>
+                <div class="badge">Standard Low Global Rate</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="link-scanner" class="section">
+    <div class="container">
+        <div class="scanner-box">
+            <h2>🔍 Try the ZeroInstall APK &amp; Phishing Link Checker</h2>
+            <p style="color: var(--text-muted); margin-top: 6px;">
+                Received a suspicious link on WhatsApp, Telegram, or SMS? Test it below or download ZeroInstall for automatic 24/7 protection.
+            </p>
+            <div class="input-row">
+                <input id="urlInput" type="text" placeholder="Paste link here (e.g. https://kyc-reward.ngrok-free.app/update.apk)" />
+                <button onclick="scanLink()">Analyze Link</button>
+            </div>
+            <div class="sample-chips">
+                <span class="chip" onclick="setSample('https://reward-gift.ngrok-free.app/kyc-update.apk')">Sample: WhatsApp APK Scam</span>
+                <span class="chip" onclick="setSample('intent://scan/#Intent;scheme=package;action=android.intent.action.INSTALL_PACKAGE;end')">Sample: Silent Intent Exploit</span>
+                <span class="chip" onclick="setSample('http://185.199.108.153/bg-tracker.dex')">Sample: Raw IP Spyware Dropper</span>
+            </div>
+            <div id="scanOutput" class="scan-output"></div>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <div class="cta-banner">
+        <h2>Protect Your Phone &amp; Your Family Today</h2>
+        <p style="color: #bfdbfe; max-width: 600px; margin: 12px auto 28px;">
+            Install <strong>ZeroInstall Shield</strong> from the official Google Play Store to lock down unauthorized APK installations and monitor background data theft 24/7.
+        </p>
+        <a class="play-btn" href="https://play.google.com/store/apps/details?id=com.security.apkshield" target="_blank" rel="noopener">
+            ▶ Download on Google Play Store
+        </a>
+    </div>
+</div>
+
+<footer>
+    <div class="container">
+        <p>© 2026 <strong>ZeroInstall.app</strong> — All security scanning is performed 100% on-device.</p>
+        <p style="margin-top: 8px;">
+            <a href="https://zeroinstall.app/privacy.html" style="color: #60a5fa;">Privacy Policy</a> •
+            <a href="https://play.google.com/store/apps/details?id=com.security.apkshield" style="color: #60a5fa;">Google Play Store</a>
+        </p>
+    </div>
+</footer>
+
+<script>
+    function setSample(url) {
+        document.getElementById('urlInput').value = url;
+        scanLink();
+    }
+
+    function scanLink() {
+        const raw = document.getElementById('urlInput').value.trim();
+        const out = document.getElementById('scanOutput');
+        if (!raw) return;
+
+        const lower = raw.toLowerCase();
+        const reasons = [];
+        let score = 0;
+
+        if (/\.(apk|xapk|apkm|apks|dex)(\?|&|#|$)/.test(lower)) {
+            score += 90;
+            reasons.push("Directly delivers an executable Android Package (.apk / .dex) payload.");
+        }
+        if (lower.startsWith("intent://")) {
+            score += 90;
+            reasons.push("Uses Android 'intent://' scheme to trigger package installation silently.");
+        }
+        if (/https?:\/\/\d{1,3}(\.\d{1,3}){3}/.test(lower)) {
+            score += 75;
+            reasons.push("Hosted on an unverified raw IP address commonly used by malware servers.");
+        }
+        if (/(ngrok|trycloudflare|duckdns|bit\.ly|tinyurl|kyc|reward|spy|tracker)/.test(lower)) {
+            score += 55;
+            reasons.push("Uses ephemeral tunnel, shortener, or high-risk social engineering lure.");
+        }
+
+        out.style.display = "block";
+        if (score >= 50) {
+            out.style.background = "rgba(239, 68, 68, 0.15)";
+            out.style.border = "1px solid #ef4444";
+            out.innerHTML = `
+                <strong style="color: #f87171; font-size: 1.05rem;">🚨 DANGER: High-Risk APK / Tracker Link Detected (Risk Score: ${Math.min(score, 100)}/100)</strong>
+                <ul style="margin: 8px 0 12px 20px; color: #fecaca;">
+                    ${reasons.map(r => `<li>${r}</li>`).join('')}
+                </ul>
+                <a href="https://play.google.com/store/apps/details?id=com.security.apkshield" target="_blank" style="color: #34d399; font-weight: 700;">
+                    → Get automatic 24/7 protection against links like this with ZeroInstall on Google Play
+                </a>
+            `;
+        } else {
+            out.style.background = "rgba(16, 185, 129, 0.15)";
+            out.style.border = "1px solid #10b981";
+            out.innerHTML = `
+                <strong style="color: #34d399;">✅ No obvious APK extension or intent exploit found in URL string.</strong>
+                <p style="color: #cbd5e1; font-size: 0.9rem; margin-top: 6px;">
+                    Note: Hidden redirect links can still deliver disguised APKs via HTTP headers. Use the <strong>ZeroInstall Android App</strong> for deep header &amp; magic-byte inspection.
+                </p>
+            `;
+        }
+    }
+</script>
+
+</body>
+</html>

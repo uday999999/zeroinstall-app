@@ -1,0 +1,9 @@
+{
+  "name": "zeroinstall-app",
+  "compatibility_date": "2024-10-01",
+  "assets": {
+    "directory": "./website",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "single-page-application"
+  }
+}
