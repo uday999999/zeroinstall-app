@@ -205,7 +205,7 @@ object ShieldRepository {
         )
 
         val notification = NotificationCompat.Builder(context, ALERT_CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_Dialog_alert)
+            .setSmallIcon(android.R.drawable.ic_dialog_alert)
             .setContentTitle("🛡️ ${event.title}")
             .setContentText(event.description)
             .setStyle(
