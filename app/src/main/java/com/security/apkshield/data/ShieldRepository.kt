@@ -32,6 +32,7 @@ object ShieldRepository {
     private const val KEY_VPN_TRACKER_FIREWALL = "vpn_tracker_firewall"
     private const val KEY_PIN_CODE = "security_pin_code"
     private const val KEY_THREAT_LOGS = "threat_logs_json"
+    private const val KEY_PRO_UNLOCKED = "zeroinstall_pro_unlocked"
 
     private const val ALERT_CHANNEL_ID = "apk_shield_critical_alerts"
 
@@ -41,9 +42,18 @@ object ShieldRepository {
     private val _blockedTrackersCount = MutableStateFlow(0)
     val blockedTrackersCount: StateFlow<Int> = _blockedTrackersCount.asStateFlow()
 
+    private val _isProUnlocked = MutableStateFlow(false)
+    val isProUnlocked: StateFlow<Boolean> = _isProUnlocked.asStateFlow()
+
     fun init(context: Context) {
         createNotificationChannel(context)
         loadLogs(context)
+        _isProUnlocked.value = prefs(context).getBoolean(KEY_PRO_UNLOCKED, false)
+    }
+
+    fun setProUnlocked(context: Context, unlocked: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PRO_UNLOCKED, unlocked).apply()
+        _isProUnlocked.value = unlocked
     }
 
     fun isBlockAllApkEnabled(context: Context): Boolean =

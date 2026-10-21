@@ -13,6 +13,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -27,10 +28,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,11 +57,27 @@ import com.security.apkshield.service.ContinuousShieldMonitorService
 import com.security.apkshield.service.MessageLinkScannerNotificationService
 import com.security.apkshield.service.TrackerBlockVpnService
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
+// Modern, Calm, Trustworthy Color Palette
+private val BgDeepSlate = Color(0xFF0A0F1D)
+private val SurfaceCard = Color(0xFF131B2E)
+private val SurfaceElevated = Color(0xFF1A2540)
+private val BorderSubtle = Color(0xFF1E293B)
+private val EmeraldPrimary = Color(0xFF10B981)
+private val EmeraldSoft = Color(0xFF34D399)
+private val EmeraldDark = Color(0xFF064E3B)
+private val SkyAccent = Color(0xFF38BDF8)
+private val GoldPro = Color(0xFFF59E0B)
+private val GoldSoft = Color(0xFFFDE68A)
+private val TextPrimary = Color(0xFFF8FAFC)
+private val TextSecondary = Color(0xFF94A3B8)
+private val DangerSoft = Color(0xFFF87171)
 
 class MainActivity : ComponentActivity() {
 
@@ -69,10 +89,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme(
                 colorScheme = darkColorScheme(
-                    primary = Color(0xFF3B82F6),
-                    secondary = Color(0xFF10B981),
-                    background = Color(0xFF0B0F19),
-                    surface = Color(0xFF151C2C)
+                    primary = EmeraldPrimary,
+                    secondary = SkyAccent,
+                    background = BgDeepSlate,
+                    surface = SurfaceCard
                 )
             ) {
                 ApkShieldMainApp()
@@ -86,9 +106,10 @@ class MainActivity : ComponentActivity() {
 fun ApkShieldMainApp() {
     val context = LocalContext.current
     var selectedTab by remember { mutableIntStateOf(0) }
-    var showPricingDialog by remember { mutableStateOf(false) }
+    var showProModal by remember { mutableStateOf(false) }
     val threatEvents by ShieldRepository.threatEvents.collectAsState()
     val blockedTrackers by ShieldRepository.blockedTrackersCount.collectAsState()
+    val isProUnlocked by ShieldRepository.isProUnlocked.collectAsState()
 
     val notifPermLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -100,91 +121,177 @@ fun ApkShieldMainApp() {
         }
     }
 
-    if (showPricingDialog) {
-        RegionalFairPricingDialog(onDismiss = { showPricingDialog = false })
+    if (showProModal) {
+        ZeroInstallProDialog(
+            isProUnlocked = isProUnlocked,
+            onUnlockPro = {
+                ShieldRepository.setProUnlocked(context, true)
+                showProModal = false
+            },
+            onSwitchToFree = {
+                ShieldRepository.setProUnlocked(context, false)
+                showProModal = false
+            },
+            onDismiss = { showProModal = false }
+        )
     }
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Shield,
-                            contentDescription = null,
-                            tint = Color(0xFF38BDF8),
-                            modifier = Modifier.size(26.dp)
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "ZeroInstall Shield",
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 18.sp,
-                                color = Color.White
-                            )
-                            Text(
-                                text = "zeroinstall.app • APK Blocker • Ghost & Data Spy",
-                                fontSize = 11.sp,
-                                color = Color(0xFF94A3B8)
-                            )
+            // Extra top margin so center camera cutout on Samsung/Android phones never overlaps text
+            Surface(
+                color = BgDeepSlate,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .statusBarsPadding()
+                        .padding(top = 10.dp, bottom = 10.dp, start = 18.dp, end = 18.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .background(
+                                        Brush.linearGradient(
+                                            listOf(EmeraldPrimary, Color(0xFF0284C7))
+                                        ),
+                                        RoundedCornerShape(10.dp)
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.VerifiedUser,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = "ZeroInstall",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 18.sp,
+                                    color = TextPrimary
+                                )
+                                Text(
+                                    text = "Mobile Security & APK Guard",
+                                    fontSize = 11.sp,
+                                    color = TextSecondary
+                                )
+                            }
                         }
+
+                        // Clean Pro Status / Upgrade Pill
                         Surface(
-                            color = Color(0xFF065F46),
+                            color = if (isProUnlocked) EmeraldDark else Color(0xFF2E1F05),
                             shape = RoundedCornerShape(50),
-                            modifier = Modifier.clickable { showPricingDialog = true }
+                            modifier = Modifier
+                                .border(
+                                    1.dp,
+                                    if (isProUnlocked) EmeraldPrimary.copy(alpha = 0.5f) else GoldPro.copy(alpha = 0.6f),
+                                    RoundedCornerShape(50)
+                                )
+                                .clickable { showProModal = true }
                         ) {
                             Row(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
-                                    Icons.Default.Public,
+                                    imageVector = if (isProUnlocked) Icons.Default.CheckCircle else Icons.Default.WorkspacePremium,
                                     contentDescription = null,
-                                    tint = Color(0xFF34D399),
-                                    modifier = Modifier.size(14.dp)
+                                    tint = if (isProUnlocked) EmeraldSoft else GoldPro,
+                                    modifier = Modifier.size(15.dp)
                                 )
-                                Spacer(modifier = Modifier.width(4.dp))
+                                Spacer(modifier = Modifier.width(5.dp))
                                 Text(
-                                    text = "Fair Price",
-                                    color = Color.White,
+                                    text = if (isProUnlocked) "PRO ACTIVE" else "UPGRADE PRO",
+                                    color = if (isProUnlocked) EmeraldSoft else GoldSoft,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
                         }
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF0F172A)
-                )
-            )
+                }
+            }
         },
         bottomBar = {
-            NavigationBar(containerColor = Color(0xFF0F172A)) {
+            NavigationBar(
+                containerColor = Color(0xFF0D1424),
+                tonalElevation = 0.dp
+            ) {
                 NavigationBarItem(
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 },
-                    icon = { Icon(Icons.Default.Security, contentDescription = null) },
-                    label = { Text("Shield", fontSize = 10.sp) }
+                    icon = { Icon(Icons.Default.Shield, contentDescription = null) },
+                    label = { Text("Protection", fontSize = 11.sp) },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = EmeraldSoft,
+                        selectedTextColor = EmeraldSoft,
+                        indicatorColor = EmeraldDark.copy(alpha = 0.6f),
+                        unselectedIconColor = TextSecondary,
+                        unselectedTextColor = TextSecondary
+                    )
                 )
                 NavigationBarItem(
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 },
-                    icon = { Icon(Icons.Default.VisibilityOff, contentDescription = null) },
-                    label = { Text("Ghost Scan", fontSize = 10.sp) }
+                    icon = { Icon(Icons.Default.Apps, contentDescription = null) },
+                    label = { Text("App Audit", fontSize = 11.sp) },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = EmeraldSoft,
+                        selectedTextColor = EmeraldSoft,
+                        indicatorColor = EmeraldDark.copy(alpha = 0.6f),
+                        unselectedIconColor = TextSecondary,
+                        unselectedTextColor = TextSecondary
+                    )
                 )
                 NavigationBarItem(
                     selected = selectedTab == 2,
                     onClick = { selectedTab = 2 },
-                    icon = { Icon(Icons.Default.SwapVert, contentDescription = null) },
-                    label = { Text("Data Spy", fontSize = 10.sp) }
+                    icon = {
+                        BadgedBox(
+                            badge = {
+                                if (!isProUnlocked) {
+                                    Badge(containerColor = GoldPro) {
+                                        Text("PRO", color = Color.Black, fontSize = 8.sp, fontWeight = FontWeight.ExtraBold)
+                                    }
+                                }
+                            }
+                        ) {
+                            Icon(Icons.Default.DataUsage, contentDescription = null)
+                        }
+                    },
+                    label = { Text("Data Guard", fontSize = 11.sp) },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = EmeraldSoft,
+                        selectedTextColor = EmeraldSoft,
+                        indicatorColor = EmeraldDark.copy(alpha = 0.6f),
+                        unselectedIconColor = TextSecondary,
+                        unselectedTextColor = TextSecondary
+                    )
                 )
                 NavigationBarItem(
                     selected = selectedTab == 3,
                     onClick = { selectedTab = 3 },
-                    icon = { Icon(Icons.Default.LinkOff, contentDescription = null) },
-                    label = { Text("Link Guard", fontSize = 10.sp) }
+                    icon = { Icon(Icons.Default.Link, contentDescription = null) },
+                    label = { Text("Link Check", fontSize = 11.sp) },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = EmeraldSoft,
+                        selectedTextColor = EmeraldSoft,
+                        indicatorColor = EmeraldDark.copy(alpha = 0.6f),
+                        unselectedIconColor = TextSecondary,
+                        unselectedTextColor = TextSecondary
+                    )
                 )
                 NavigationBarItem(
                     selected = selectedTab == 4,
@@ -193,18 +300,27 @@ fun ApkShieldMainApp() {
                         BadgedBox(
                             badge = {
                                 if (threatEvents.isNotEmpty()) {
-                                    Badge { Text("${threatEvents.size}") }
+                                    Badge(containerColor = EmeraldPrimary) {
+                                        Text("${threatEvents.size}", color = Color.White)
+                                    }
                                 }
                             }
                         ) {
-                            Icon(Icons.Default.History, contentDescription = null)
+                            Icon(Icons.Default.NotificationsNone, contentDescription = null)
                         }
                     },
-                    label = { Text("Alerts", fontSize = 10.sp) }
+                    label = { Text("Activity", fontSize = 11.sp) },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = EmeraldSoft,
+                        selectedTextColor = EmeraldSoft,
+                        indicatorColor = EmeraldDark.copy(alpha = 0.6f),
+                        unselectedIconColor = TextSecondary,
+                        unselectedTextColor = TextSecondary
+                    )
                 )
             }
         },
-        containerColor = Color(0xFF0B0F19)
+        containerColor = BgDeepSlate
     ) { innerPadding ->
         Box(
             modifier = Modifier
@@ -216,10 +332,15 @@ fun ApkShieldMainApp() {
                     context = context,
                     totalBlocked = threatEvents.size,
                     blockedTrackers = blockedTrackers,
-                    onOpenPricing = { showPricingDialog = true }
+                    isProUnlocked = isProUnlocked,
+                    onOpenPro = { showProModal = true }
                 )
                 1 -> GhostAndSpywareAuditTab(context)
-                2 -> DataExfiltrationMonitorTab(context)
+                2 -> DataExfiltrationMonitorTab(
+                    context = context,
+                    isProUnlocked = isProUnlocked,
+                    onOpenPro = { showProModal = true }
+                )
                 3 -> LinkScannerTab(context)
                 4 -> ThreatHistoryTab(context, threatEvents)
             }
@@ -227,11 +348,6 @@ fun ApkShieldMainApp() {
     }
 }
 
-/**
- * GOOGLE PLAY MANDATORY PROMINENT DISCLOSURE DIALOG
- * Ensures 100% Google Play review compliance before requesting Accessibility,
- * Notification Listener, VPN, Usage Access, or Device Admin permissions.
- */
 @Composable
 fun ProminentDisclosureModal(
     disclosure: ProminentDisclosureType,
@@ -240,26 +356,27 @@ fun ProminentDisclosureModal(
 ) {
     AlertDialog(
         onDismissRequest = onDecline,
-        containerColor = Color(0xFF151C2C),
+        containerColor = SurfaceCard,
+        shape = RoundedCornerShape(20.dp),
         title = {
             Column {
                 Surface(
-                    color = Color(0xFF1D4ED8),
-                    shape = RoundedCornerShape(6.dp)
+                    color = EmeraldDark,
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
-                        text = "GOOGLE PLAY PRIVACY DISCLOSURE",
-                        color = Color.White,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                        text = disclosure.permissionBadge,
+                        color = EmeraldSoft,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                     )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = disclosure.title,
-                    color = Color.White,
-                    fontWeight = FontWeight.ExtraBold,
+                    color = TextPrimary,
+                    fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )
             }
@@ -267,160 +384,38 @@ fun ProminentDisclosureModal(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
-                    text = "What is accessed:",
-                    color = Color(0xFF38BDF8),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp
-                )
-                Text(
                     text = disclosure.whatIsAccessed,
                     color = Color(0xFFE2E8F0),
-                    fontSize = 13.sp
-                )
-                Text(
-                    text = "Why it is needed:",
-                    color = Color(0xFF38BDF8),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp
+                    fontSize = 13.sp,
+                    lineHeight = 19.sp
                 )
                 Text(
                     text = disclosure.howItIsUsed,
-                    color = Color(0xFFE2E8F0),
-                    fontSize = 13.sp
+                    color = TextSecondary,
+                    fontSize = 13.sp,
+                    lineHeight = 19.sp
                 )
                 Surface(
-                    color = Color(0xFF064E3B),
-                    shape = RoundedCornerShape(10.dp)
+                    color = Color(0xFF0D1F1A),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.border(1.dp, EmeraldPrimary.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
                 ) {
-                    Text(
-                        text = "🔒 ${disclosure.privacyGuarantee}",
-                        color = Color(0xFFA7F3D0),
-                        fontSize = 12.sp,
-                        modifier = Modifier.padding(10.dp)
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = onAccept,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF10B981))
-            ) {
-                Text("Accept & Enable", fontWeight = FontWeight.Bold)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDecline) {
-                Text("No Thanks", color = Color(0xFF94A3B8))
-            }
-        }
-    )
-}
-
-/**
- * PURCHASING POWER PARITY (PPP) FAIR REGIONAL PRICING DIALOG
- * Automatically lowers subscription cost in lower per-capita income nations via Google Play Billing.
- */
-@Composable
-fun RegionalFairPricingDialog(onDismiss: () -> Unit) {
-    val userTier = remember { RegionalPricingManager.getCurrentUserRegionalPrice() }
-    val allTiers = remember { RegionalPricingManager.getAllSampleTiers() }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = Color(0xFF151C2C),
-        title = {
-            Column {
-                Text(
-                    text = "🌍 People-First Regional Fair Pricing",
-                    color = Color.White,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 18.sp
-                )
-                Text(
-                    text = "Automatically adjusted for local per-capita income via Google Play",
-                    color = Color(0xFF94A3B8),
-                    fontSize = 12.sp
-                )
-            }
-        },
-        text = {
-            LazyColumn(
-                modifier = Modifier.heightIn(max = 420.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                item {
-                    Card(
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF064E3B)),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(modifier = Modifier.padding(12.dp)) {
-                            Text(
-                                text = "YOUR REGION (${userTier.countryName})",
-                                color = Color(0xFF6EE7B7),
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = "${userTier.monthlyPriceFormatted}  •  ${userTier.yearlyPriceFormatted}",
-                                color = Color.White,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 17.sp
-                            )
-                            Text(
-                                text = "✓ ${userTier.pppDiscountNote}",
-                                color = Color(0xFFA7F3D0),
-                                fontSize = 11.sp
-                            )
-                        }
-                    }
-                }
-
-                item {
-                    Text(
-                        text = "• Core APK Blocker, Ghost App Scanner & Bank Screen-Share Scam Protection are 100% FREE forever.\n• Pro unlocks 24/7 Automatic VPN Tracker Firewall, Deep Background Upload Alerts & Family Protection (up to 5 phones).",
-                        color = Color(0xFFCBD5E1),
-                        fontSize = 12.sp
-                    )
-                }
-
-                item {
-                    Text(
-                        text = "GLOBAL PURCHASING-POWER PRICING EXAMPLES:",
-                        color = Color(0xFF38BDF8),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                items(allTiers) { tier ->
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color(0xFF0F172A), RoundedCornerShape(8.dp))
-                            .padding(horizontal = 10.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.padding(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column {
-                            Text(
-                                text = "${tier.countryName} (${tier.countryCode})",
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp
-                            )
-                            Text(
-                                text = tier.pppDiscountNote,
-                                color = Color(0xFF64748B),
-                                fontSize = 10.sp
-                            )
-                        }
+                        Icon(
+                            Icons.Default.Lock,
+                            contentDescription = null,
+                            tint = EmeraldSoft,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = tier.monthlyPriceFormatted,
-                            color = Color(0xFF34D399),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp
+                            text = disclosure.privacyGuarantee,
+                            color = Color(0xFFA7F3D0),
+                            fontSize = 12.sp,
+                            lineHeight = 17.sp
                         )
                     }
                 }
@@ -428,17 +423,771 @@ fun RegionalFairPricingDialog(onDismiss: () -> Unit) {
         },
         confirmButton = {
             Button(
-                onClick = onDismiss,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB))
+                onClick = onAccept,
+                colors = ButtonDefaults.buttonColors(containerColor = EmeraldPrimary),
+                shape = RoundedCornerShape(10.dp)
             ) {
-                Text("Got It")
+                Text("Continue", color = Color.White, fontWeight = FontWeight.Bold)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDecline) {
+                Text("Not Now", color = TextSecondary)
             }
         }
     )
 }
 
 @Composable
-fun DataExfiltrationMonitorTab(context: Context) {
+fun ZeroInstallProDialog(
+    isProUnlocked: Boolean,
+    onUnlockPro: () -> Unit,
+    onSwitchToFree: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val price = remember { RegionalPricingManager.getCurrentUserRegionalPrice() }
+    var selectedPlan by remember { mutableIntStateOf(0) } // 0 = Annual, 1 = Monthly
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = SurfaceCard,
+        shape = RoundedCornerShape(24.dp),
+        title = {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                Box(
+                    modifier = Modifier
+                        .size(52.dp)
+                        .background(
+                            Brush.linearGradient(listOf(GoldPro, Color(0xFFD97706))),
+                            CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Default.WorkspacePremium,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = "ZeroInstall Pro",
+                    color = TextPrimary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                )
+                Text(
+                    text = "Complete 24/7 automated protection for your phone",
+                    color = TextSecondary,
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                ProFeatureItem("Auto-Scan WhatsApp, SMS & Telegram Links")
+                ProFeatureItem("24/7 Background Tracker & Spyware Firewall")
+                ProFeatureItem("Deep App Data Upload & Leak Monitor")
+                ProFeatureItem("Anti-Tamper Uninstall Protection Lock")
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Annual Plan Card
+                Surface(
+                    color = if (selectedPlan == 0) EmeraldDark.copy(alpha = 0.5f) else BgDeepSlate,
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(
+                            width = if (selectedPlan == 0) 1.5.dp else 1.dp,
+                            color = if (selectedPlan == 0) EmeraldPrimary else BorderSubtle,
+                            shape = RoundedCornerShape(14.dp)
+                        )
+                        .clickable { selectedPlan = 0 }
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text("Annual Plan", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Surface(color = EmeraldPrimary, shape = RoundedCornerShape(50)) {
+                                    Text(
+                                        "BEST VALUE",
+                                        color = Color.Black,
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    )
+                                }
+                            }
+                            Text("7-day free trial • Cancel anytime", color = TextSecondary, fontSize = 11.sp)
+                        }
+                        Text(price.yearlyPriceFormatted, color = EmeraldSoft, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    }
+                }
+
+                // Monthly Plan Card
+                Surface(
+                    color = if (selectedPlan == 1) EmeraldDark.copy(alpha = 0.5f) else BgDeepSlate,
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(
+                            width = if (selectedPlan == 1) 1.5.dp else 1.dp,
+                            color = if (selectedPlan == 1) EmeraldPrimary else BorderSubtle,
+                            shape = RoundedCornerShape(14.dp)
+                        )
+                        .clickable { selectedPlan = 1 }
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text("Monthly Plan", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                            Text("Flexible monthly protection", color = TextSecondary, fontSize = 11.sp)
+                        }
+                        Text(price.monthlyPriceFormatted, color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                if (!isProUnlocked) {
+                    Button(
+                        onClick = onUnlockPro,
+                        colors = ButtonDefaults.buttonColors(containerColor = EmeraldPrimary),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            "Start 7-Day Free Trial",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
+                    }
+                } else {
+                    OutlinedButton(
+                        onClick = onSwitchToFree,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Switch Back to Free Tier (Test Mode)", color = TextSecondary, fontSize = 12.sp)
+                    }
+                }
+                TextButton(onClick = onDismiss) {
+                    Text("Close", color = TextSecondary, fontSize = 12.sp)
+                }
+            }
+        }
+    )
+}
+
+@Composable
+private fun ProFeatureItem(text: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            Icons.Default.CheckCircle,
+            contentDescription = null,
+            tint = EmeraldSoft,
+            modifier = Modifier.size(16.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text = text, color = TextPrimary, fontSize = 13.sp)
+    }
+}
+
+@Composable
+fun ShieldDashboardTab(
+    context: Context,
+    totalBlocked: Int,
+    blockedTrackers: Int,
+    isProUnlocked: Boolean,
+    onOpenPro: () -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    var blockAllApk by remember { mutableStateOf(ShieldRepository.isBlockAllApkEnabled(context)) }
+    var blockUnknownSources by remember { mutableStateOf(ShieldRepository.isBlockUnknownSourcesSettingsEnabled(context)) }
+    var autoDeleteApks by remember { mutableStateOf(ShieldRepository.isAutoDeleteDownloadedApks(context)) }
+    var blockLinks by remember { mutableStateOf(ShieldRepository.isBlockMaliciousLinksEnabled(context)) }
+    var detectGhostApps by remember { mutableStateOf(ShieldRepository.isDetectInvisibleAppsEnabled(context)) }
+    var allowPlayUpdates by remember { mutableStateOf(ShieldRepository.isAllowPlayStoreUpdates(context)) }
+
+    var isAccessibilityActive by remember { mutableStateOf(isAccessibilityServiceEnabled(context)) }
+    var isNotificationGuardActive by remember { mutableStateOf(isNotificationListenerEnabled(context)) }
+    var isDeviceAdminActive by remember { mutableStateOf(ShieldDeviceAdminReceiver.isAdminActive(context)) }
+    var isVpnRunning by remember { mutableStateOf(TrackerBlockVpnService.isVpnActive) }
+
+    var pendingDisclosure by remember { mutableStateOf<ProminentDisclosureType?>(null) }
+    var isQuickScanning by remember { mutableStateOf(false) }
+    var quickScanComplete by remember { mutableStateOf(false) }
+
+    val remoteScamApps = remember(quickScanComplete) { PeopleProtectionTools.detectRemoteAccessScamApps(context) }
+    val wifiReport = remember(quickScanComplete) { PeopleProtectionTools.auditNetworkProxySafety(context) }
+
+    val vpnLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        val startIntent = Intent(context, TrackerBlockVpnService::class.java).apply {
+            action = TrackerBlockVpnService.ACTION_START
+        }
+        context.startService(startIntent)
+        isVpnRunning = true
+    }
+
+    pendingDisclosure?.let { disclosure ->
+        ProminentDisclosureModal(
+            disclosure = disclosure,
+            onAccept = {
+                pendingDisclosure = null
+                when (disclosure) {
+                    ProminentDisclosureType.ACCESSIBILITY -> {
+                        context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                    }
+                    ProminentDisclosureType.NOTIFICATION_LISTENER -> {
+                        context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+                    }
+                    ProminentDisclosureType.VPN_FIREWALL -> {
+                        val prepare = VpnService.prepare(context)
+                        if (prepare != null) {
+                            vpnLauncher.launch(prepare)
+                        } else {
+                            val startIntent = Intent(context, TrackerBlockVpnService::class.java).apply {
+                                action = TrackerBlockVpnService.ACTION_START
+                            }
+                            context.startService(startIntent)
+                            isVpnRunning = true
+                        }
+                    }
+                    ProminentDisclosureType.DEVICE_ADMIN -> {
+                        val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
+                            putExtra(
+                                DevicePolicyManager.EXTRA_DEVICE_ADMIN,
+                                ShieldDeviceAdminReceiver.getComponentName(context)
+                            )
+                            putExtra(
+                                DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                                "Prevents unauthorized removal of ZeroInstall Shield."
+                            )
+                        }
+                        context.startActivity(intent)
+                    }
+                    ProminentDisclosureType.USAGE_AND_NETWORK_STATS -> {
+                        context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+                    }
+                }
+            },
+            onDecline = { pendingDisclosure = null }
+        )
+    }
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 18.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(top = 6.dp, bottom = 28.dp)
+    ) {
+        // 1. Calm, Modern Protection Hero Card
+        item {
+            Card(
+                colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                shape = RoundedCornerShape(24.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = if (blockAllApk) {
+                                listOf(Color(0xFF0A362B), Color(0xFF111C33))
+                            } else {
+                                listOf(Color(0xFF3B1D1D), Color(0xFF111C33))
+                            }
+                        ),
+                        RoundedCornerShape(24.dp)
+                    )
+                    .border(
+                        1.dp,
+                        if (blockAllApk) EmeraldPrimary.copy(alpha = 0.35f) else DangerSoft.copy(alpha = 0.35f),
+                        RoundedCornerShape(24.dp)
+                    )
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(22.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Glowing Shield Emblem
+                    Box(
+                        modifier = Modifier
+                            .size(76.dp)
+                            .background(
+                                if (blockAllApk) EmeraldPrimary.copy(alpha = 0.16f) else DangerSoft.copy(alpha = 0.16f),
+                                CircleShape
+                            )
+                            .border(
+                                2.dp,
+                                if (blockAllApk) EmeraldSoft else DangerSoft,
+                                CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isQuickScanning) {
+                            CircularProgressIndicator(
+                                color = EmeraldSoft,
+                                strokeWidth = 3.dp,
+                                modifier = Modifier.size(44.dp)
+                            )
+                        } else {
+                            Icon(
+                                imageVector = if (blockAllApk) Icons.Default.VerifiedUser else Icons.Default.GppMaybe,
+                                contentDescription = null,
+                                tint = if (blockAllApk) EmeraldSoft else DangerSoft,
+                                modifier = Modifier.size(38.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Text(
+                        text = when {
+                            isQuickScanning -> "Scanning Device Security..."
+                            quickScanComplete -> "All Security Checks Passed"
+                            blockAllApk -> "Your Phone is Protected"
+                            else -> "APK Protection is Paused"
+                        },
+                        color = TextPrimary,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = "Real-time shield against unauthorized APK installs & scam links",
+                        color = TextSecondary,
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(18.dp))
+
+                    // Clean 3-column metrics
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        MetricTile(
+                            modifier = Modifier.weight(1f),
+                            value = "$totalBlocked",
+                            label = "Threats Blocked",
+                            valueColor = TextPrimary
+                        )
+                        MetricTile(
+                            modifier = Modifier.weight(1f),
+                            value = "$blockedTrackers",
+                            label = "Trackers Stopped",
+                            valueColor = SkyAccent
+                        )
+                        MetricTile(
+                            modifier = Modifier.weight(1f),
+                            value = if (remoteScamApps.isEmpty() && !wifiReport.isProxyDetected) "Safe" else "Alert",
+                            label = "Call & Wi-Fi",
+                            valueColor = if (remoteScamApps.isEmpty() && !wifiReport.isProxyDetected) EmeraldSoft else GoldPro
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Calm, feel-good "Smart Security Scan" button
+                    Button(
+                        onClick = {
+                            if (!isQuickScanning) {
+                                isQuickScanning = true
+                                scope.launch {
+                                    delay(1200)
+                                    isQuickScanning = false
+                                    quickScanComplete = true
+                                }
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = EmeraldPrimary
+                        ),
+                        shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(
+                            imageVector = if (quickScanComplete) Icons.Default.CheckCircle else Icons.Default.Radar,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = if (isQuickScanning) "Checking Apps, Network & Installers..." else if (quickScanComplete) "Scan Complete • Tap to Re-Scan" else "Run Quick Security Scan",
+                            color = Color.White,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
+                    }
+                }
+            }
+        }
+
+        // 2. Banking & Screen-Share Safety Status Card
+        item {
+            Card(
+                colors = CardDefaults.cardColors(containerColor = SurfaceCard),
+                shape = RoundedCornerShape(18.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, BorderSubtle, RoundedCornerShape(18.dp))
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(42.dp)
+                            .background(
+                                if (remoteScamApps.isEmpty()) EmeraldDark.copy(alpha = 0.6f) else Color(0xFF3B1D1D),
+                                RoundedCornerShape(12.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.PhonelinkLock,
+                            contentDescription = null,
+                            tint = if (remoteScamApps.isEmpty()) EmeraldSoft else DangerSoft,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(14.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Bank Call & Screen-Share Safety",
+                            color = TextPrimary,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp
+                        )
+                        if (remoteScamApps.isEmpty()) {
+                            Text(
+                                text = "No screen-sharing apps (AnyDesk / TeamViewer) detected. Your OTPs are safe.",
+                                color = TextSecondary,
+                                fontSize = 12.sp,
+                                lineHeight = 17.sp
+                            )
+                        } else {
+                            remoteScamApps.forEach { app ->
+                                Text(
+                                    text = "Attention: ${app.appName} is installed on this phone.",
+                                    color = DangerSoft,
+                                    fontSize = 12.sp
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 3. Protection Layers Section (Free + Pro)
+        item {
+            Text(
+                text = "Protection Layers",
+                color = TextPrimary,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        item {
+            EnginePermissionCard(
+                icon = Icons.Default.AppBlocking,
+                title = "APK Install Blocker",
+                subtitle = "Blocks unauthorized APK install popups from browsers and file managers.",
+                isEnabled = isAccessibilityActive,
+                isProFeature = false,
+                isProUnlocked = true,
+                buttonText = if (isAccessibilityActive) "Active" else "Enable",
+                onClick = {
+                    if (isAccessibilityActive) {
+                        context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                    } else {
+                        pendingDisclosure = ProminentDisclosureType.ACCESSIBILITY
+                    }
+                },
+                onRefresh = { isAccessibilityActive = isAccessibilityServiceEnabled(context) }
+            )
+        }
+
+        item {
+            EnginePermissionCard(
+                icon = Icons.Default.MarkChatRead,
+                title = "WhatsApp & SMS Link Guard",
+                subtitle = "Automatically scans incoming message links for phishing & hidden APKs.",
+                isEnabled = isNotificationGuardActive && isProUnlocked,
+                isProFeature = true,
+                isProUnlocked = isProUnlocked,
+                buttonText = when {
+                    !isProUnlocked -> "Pro"
+                    isNotificationGuardActive -> "Active"
+                    else -> "Enable"
+                },
+                onClick = {
+                    if (!isProUnlocked) {
+                        onOpenPro()
+                    } else if (isNotificationGuardActive) {
+                        context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+                    } else {
+                        pendingDisclosure = ProminentDisclosureType.NOTIFICATION_LISTENER
+                    }
+                },
+                onRefresh = { isNotificationGuardActive = isNotificationListenerEnabled(context) }
+            )
+        }
+
+        item {
+            EnginePermissionCard(
+                icon = Icons.Default.VpnLock,
+                title = "Tracker & Spyware Firewall",
+                subtitle = "Blocks background apps from connecting to spyware & tracker servers.",
+                isEnabled = isVpnRunning && isProUnlocked,
+                isProFeature = true,
+                isProUnlocked = isProUnlocked,
+                buttonText = when {
+                    !isProUnlocked -> "Pro"
+                    isVpnRunning -> "Stop"
+                    else -> "Start"
+                },
+                onClick = {
+                    if (!isProUnlocked) {
+                        onOpenPro()
+                    } else if (isVpnRunning) {
+                        val stopIntent = Intent(context, TrackerBlockVpnService::class.java).apply {
+                            action = TrackerBlockVpnService.ACTION_STOP
+                        }
+                        context.startService(stopIntent)
+                        isVpnRunning = false
+                    } else {
+                        pendingDisclosure = ProminentDisclosureType.VPN_FIREWALL
+                    }
+                },
+                onRefresh = { isVpnRunning = TrackerBlockVpnService.isVpnActive }
+            )
+        }
+
+        item {
+            EnginePermissionCard(
+                icon = Icons.Default.LockPerson,
+                title = "Anti-Tamper Uninstall Lock",
+                subtitle = "Prevents malware or intruders from silently removing ZeroInstall.",
+                isEnabled = isDeviceAdminActive && isProUnlocked,
+                isProFeature = true,
+                isProUnlocked = isProUnlocked,
+                buttonText = when {
+                    !isProUnlocked -> "Pro"
+                    isDeviceAdminActive -> "Locked"
+                    else -> "Enable"
+                },
+                onClick = {
+                    if (!isProUnlocked) {
+                        onOpenPro()
+                    } else {
+                        pendingDisclosure = ProminentDisclosureType.DEVICE_ADMIN
+                    }
+                },
+                onRefresh = { isDeviceAdminActive = ShieldDeviceAdminReceiver.isAdminActive(context) }
+            )
+        }
+
+        // 4. Security Preferences
+        item {
+            Text(
+                text = "Security Preferences",
+                color = TextPrimary,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        item {
+            Card(
+                colors = CardDefaults.cardColors(containerColor = SurfaceCard),
+                shape = RoundedCornerShape(18.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, BorderSubtle, RoundedCornerShape(18.dp))
+            ) {
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    PolicySwitchRow(
+                        title = "Block Sideloaded APK Installs",
+                        subtitle = "Stop unauthorized .apk & .xapk files outside Google Play",
+                        checked = blockAllApk,
+                        onCheckedChange = {
+                            blockAllApk = it
+                            ShieldRepository.setBlockAllApkEnabled(context, it)
+                            ShieldDeviceAdminReceiver.enforceOsLevelApkBlockIfPossible(context, it)
+                        }
+                    )
+                    HorizontalDivider(color = BorderSubtle)
+                    PolicySwitchRow(
+                        title = "Protect 'Install Unknown Apps' Settings",
+                        subtitle = "Warn before Unknown Sources is enabled for any app",
+                        checked = blockUnknownSources,
+                        onCheckedChange = {
+                            blockUnknownSources = it
+                            ShieldRepository.setBlockUnknownSourcesSettingsEnabled(context, it)
+                        }
+                    )
+                    HorizontalDivider(color = BorderSubtle)
+                    PolicySwitchRow(
+                        title = "Auto-Clean Downloaded APK Files",
+                        subtitle = "Automatically quarantine newly downloaded .apk files",
+                        checked = autoDeleteApks,
+                        onCheckedChange = {
+                            autoDeleteApks = it
+                            ShieldRepository.setAutoDeleteDownloadedApks(context, it)
+                        }
+                    )
+                    HorizontalDivider(color = BorderSubtle)
+                    PolicySwitchRow(
+                        title = "Block Dangerous Download Links",
+                        subtitle = "Stop drive-by APK downloads and suspicious redirect links",
+                        checked = blockLinks,
+                        onCheckedChange = {
+                            blockLinks = it
+                            ShieldRepository.setBlockMaliciousLinksEnabled(context, it)
+                        }
+                    )
+                    HorizontalDivider(color = BorderSubtle)
+                    PolicySwitchRow(
+                        title = "Detect Hidden Iconless Apps",
+                        subtitle = "Alert immediately if an app installs without a home screen icon",
+                        checked = detectGhostApps,
+                        onCheckedChange = {
+                            detectGhostApps = it
+                            ShieldRepository.setDetectInvisibleAppsEnabled(context, it)
+                        }
+                    )
+                    HorizontalDivider(color = BorderSubtle)
+                    PolicySwitchRow(
+                        title = "Allow Official Google Play Updates",
+                        subtitle = "Let verified Google Play Store updates install normally",
+                        checked = allowPlayUpdates,
+                        onCheckedChange = {
+                            allowPlayUpdates = it
+                            ShieldRepository.setAllowPlayStoreUpdates(context, it)
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DataExfiltrationMonitorTab(
+    context: Context,
+    isProUnlocked: Boolean,
+    onOpenPro: () -> Unit
+) {
+    // If user is on the Free tier, show a clean, attractive Pro Upgrade gate for Data Guard
+    if (!isProUnlocked) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Card(
+                colors = CardDefaults.cardColors(containerColor = SurfaceCard),
+                shape = RoundedCornerShape(24.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, GoldPro.copy(alpha = 0.4f), RoundedCornerShape(24.dp))
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(64.dp)
+                            .background(Color(0xFF2E1F05), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Default.DataUsage,
+                            contentDescription = null,
+                            tint = GoldPro,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Surface(
+                        color = GoldPro,
+                        shape = RoundedCornerShape(50)
+                    ) {
+                        Text(
+                            text = "ZEROINSTALL PRO FEATURE",
+                            color = Color.Black,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = "Deep Background Data & Upload Monitor",
+                        color = TextPrimary,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 19.sp,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "See exactly which apps are secretly uploading your personal data, photos, or contacts in the background while your screen is off.",
+                        color = TextSecondary,
+                        fontSize = 13.sp,
+                        textAlign = TextAlign.Center,
+                        lineHeight = 19.sp
+                    )
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Button(
+                        onClick = onOpenPro,
+                        colors = ButtonDefaults.buttonColors(containerColor = EmeraldPrimary),
+                        shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.WorkspacePremium, contentDescription = null, tint = Color.White)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            "Unlock with ZeroInstall Pro",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
+                    }
+                }
+            }
+        }
+        return
+    }
+
     val scope = rememberCoroutineScope()
     var hasUsageAccess by remember {
         mutableStateOf(NetworkAndDataExfiltrationMonitor.hasUsageStatsPermission(context))
@@ -486,7 +1235,7 @@ fun DataExfiltrationMonitorTab(context: Context) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(horizontal = 18.dp, vertical = 8.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -495,52 +1244,53 @@ fun DataExfiltrationMonitorTab(context: Context) {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "App Upload, Download & Data Theft Monitor",
-                    color = Color.White,
+                    text = "Background Data Guard",
+                    color = TextPrimary,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 17.sp
+                    fontSize = 18.sp
                 )
                 Text(
-                    text = "See which apps upload data in the background & what personal data they take",
-                    color = Color(0xFF94A3B8),
-                    fontSize = 11.sp
+                    text = "Monitor background data uploads and sensitive permissions per app",
+                    color = TextSecondary,
+                    fontSize = 12.sp
                 )
             }
             IconButton(onClick = { refreshStats() }) {
-                Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = Color(0xFF38BDF8))
+                Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = EmeraldSoft)
             }
         }
 
         if (!hasUsageAccess) {
             Spacer(modifier = Modifier.height(10.dp))
             Card(
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF422006)),
-                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = SurfaceElevated),
+                shape = RoundedCornerShape(14.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
-                    modifier = Modifier.padding(12.dp),
+                    modifier = Modifier.padding(14.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Grant Usage Access for Deep Background Upload Stats",
-                            color = Color(0xFFFDE68A),
-                            fontWeight = FontWeight.Bold,
+                            text = "Enable Detailed Usage Insights",
+                            color = TextPrimary,
+                            fontWeight = FontWeight.SemiBold,
                             fontSize = 13.sp
                         )
                         Text(
-                            text = "Allows inspecting 30-day Background vs. Foreground upload/download history per app.",
-                            color = Color(0xFFFEF3C7),
+                            text = "Allow Usage Access to inspect 30-day background upload history.",
+                            color = TextSecondary,
                             fontSize = 11.sp
                         )
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = { showUsageDisclosure = true },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD97706))
+                        colors = ButtonDefaults.buttonColors(containerColor = EmeraldPrimary),
+                        shape = RoundedCornerShape(10.dp)
                     ) {
-                        Text("Grant", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text("Enable", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -552,17 +1302,17 @@ fun DataExfiltrationMonitorTab(context: Context) {
             FilterChip(
                 selected = filterMode == 0,
                 onClick = { filterMode = 0 },
-                label = { Text("Top Uploaders (${reports.size})", fontSize = 11.sp) }
+                label = { Text("All Apps (${reports.size})", fontSize = 11.sp) }
             )
             FilterChip(
                 selected = filterMode == 1,
                 onClick = { filterMode = 1 },
-                label = { Text("🚨 Data Leak Risk", fontSize = 11.sp) }
+                label = { Text("High Upload Ratio", fontSize = 11.sp) }
             )
             FilterChip(
                 selected = filterMode == 2,
                 onClick = { filterMode = 2 },
-                label = { Text("🔍 Taking Private Data", fontSize = 11.sp) }
+                label = { Text("Sensitive Access", fontSize = 11.sp) }
             )
         }
 
@@ -570,13 +1320,13 @@ fun DataExfiltrationMonitorTab(context: Context) {
 
         if (isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Color(0xFF38BDF8))
+                CircularProgressIndicator(color = EmeraldSoft)
             }
         } else if (filteredReports.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
-                    "✅ No suspicious background data uploaders detected in this filter!",
-                    color = Color(0xFF34D399),
+                    "No unusual background data activity found in this view.",
+                    color = EmeraldSoft,
                     fontSize = 14.sp
                 )
             }
@@ -584,19 +1334,17 @@ fun DataExfiltrationMonitorTab(context: Context) {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(filteredReports, key = { it.packageName }) { item ->
                     Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (item.isSuspiciousExfiltration) Color(0xFF2A1215) else Color(0xFF151C2C)
-                        ),
-                        shape = RoundedCornerShape(14.dp),
+                        colors = CardDefaults.cardColors(containerColor = SurfaceCard),
+                        shape = RoundedCornerShape(16.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .border(
                                 width = 1.dp,
-                                color = if (item.isSuspiciousExfiltration) Color(0xFFEF4444).copy(alpha = 0.5f) else Color.Transparent,
-                                shape = RoundedCornerShape(14.dp)
+                                color = if (item.isSuspiciousExfiltration) DangerSoft.copy(alpha = 0.5f) else BorderSubtle,
+                                shape = RoundedCornerShape(16.dp)
                             )
                     ) {
-                        Column(modifier = Modifier.padding(14.dp)) {
+                        Column(modifier = Modifier.padding(16.dp)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -605,27 +1353,27 @@ fun DataExfiltrationMonitorTab(context: Context) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = item.appName,
-                                        color = Color.White,
+                                        color = TextPrimary,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 15.sp
                                     )
                                     Text(
                                         text = item.packageName,
-                                        color = Color(0xFF64748B),
+                                        color = TextSecondary,
                                         fontSize = 11.sp
                                     )
                                 }
                                 if (item.isSuspiciousExfiltration) {
                                     Surface(
-                                        color = Color(0xFFDC2626),
+                                        color = Color(0xFF3B1D1D),
                                         shape = RoundedCornerShape(50)
                                     ) {
                                         Text(
-                                            text = "DATA EXFILTRATION RISK",
-                                            color = Color.White,
+                                            text = "High Upload",
+                                            color = DangerSoft,
                                             fontSize = 10.sp,
                                             fontWeight = FontWeight.Bold,
-                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                                         )
                                     }
                                 }
@@ -636,52 +1384,35 @@ fun DataExfiltrationMonitorTab(context: Context) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .background(Color(0xFF0F172A), RoundedCornerShape(10.dp))
-                                    .padding(10.dp),
+                                    .background(BgDeepSlate, RoundedCornerShape(12.dp))
+                                    .padding(12.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Column {
-                                    Text("⬆ UPLOADED (SENT)", color = Color(0xFFF87171), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                    Text("SENT (UPLOAD)", color = TextSecondary, fontSize = 10.sp)
                                     Text(
                                         text = NetworkAndDataExfiltrationMonitor.formatBytes(item.uploadedBytes),
-                                        color = Color.White,
-                                        fontWeight = FontWeight.ExtraBold,
+                                        color = TextPrimary,
+                                        fontWeight = FontWeight.Bold,
                                         fontSize = 14.sp
                                     )
-                                    Text(
-                                        text = "Bg: ${NetworkAndDataExfiltrationMonitor.formatBytes(item.backgroundUploadedBytes)}",
-                                        color = Color(0xFFFCA5A5),
-                                        fontSize = 10.sp
-                                    )
                                 }
-
                                 Column {
-                                    Text("⬇ DOWNLOADED", color = Color(0xFF38BDF8), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                    Text("RECEIVED", color = TextSecondary, fontSize = 10.sp)
                                     Text(
                                         text = NetworkAndDataExfiltrationMonitor.formatBytes(item.downloadedBytes),
-                                        color = Color.White,
-                                        fontWeight = FontWeight.ExtraBold,
+                                        color = TextPrimary,
+                                        fontWeight = FontWeight.Bold,
                                         fontSize = 14.sp
-                                    )
-                                    Text(
-                                        text = "Bg: ${NetworkAndDataExfiltrationMonitor.formatBytes(item.backgroundDownloadedBytes)}",
-                                        color = Color(0xFF93C5FD),
-                                        fontSize = 10.sp
                                     )
                                 }
-
                                 Column(horizontalAlignment = Alignment.End) {
-                                    Text("UPLOAD RATIO", color = Color(0xFFFBBF24), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                    Text("UPLOAD SHARE", color = TextSecondary, fontSize = 10.sp)
                                     Text(
                                         text = "${item.uploadRatioPercent}%",
-                                        color = if (item.uploadRatioPercent >= 40) Color(0xFFEF4444) else Color(0xFF34D399),
-                                        fontWeight = FontWeight.ExtraBold,
+                                        color = if (item.uploadRatioPercent >= 40) GoldPro else EmeraldSoft,
+                                        fontWeight = FontWeight.Bold,
                                         fontSize = 14.sp
-                                    )
-                                    Text(
-                                        text = "Screen: ${item.foregroundTimeMs / 60000}m",
-                                        color = Color(0xFF94A3B8),
-                                        fontSize = 10.sp
                                     )
                                 }
                             }
@@ -689,19 +1420,9 @@ fun DataExfiltrationMonitorTab(context: Context) {
                             if (item.sensitiveDataAccessed.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    text = "📂 Personal Data This App Takes: ${item.sensitiveDataAccessed.joinToString(" • ")}",
-                                    color = Color(0xFFFBBF24),
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
-
-                            item.exfiltrationWarning?.let { warning ->
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Text(
-                                    text = warning,
-                                    color = Color(0xFFFCA5A5),
-                                    fontSize = 12.sp
+                                    text = "Permissions: ${item.sensitiveDataAccessed.joinToString(" • ")}",
+                                    color = TextSecondary,
+                                    fontSize = 11.sp
                                 )
                             }
 
@@ -715,9 +1436,10 @@ fun DataExfiltrationMonitorTab(context: Context) {
                                         }
                                         context.startActivity(infoIntent)
                                     },
+                                    shape = RoundedCornerShape(10.dp),
                                     modifier = Modifier.weight(1f)
                                 ) {
-                                    Text("Block Data / Permissions", fontSize = 11.sp)
+                                    Text("App Settings", fontSize = 12.sp, color = TextPrimary)
                                 }
 
                                 if (!item.isSystemApp) {
@@ -728,428 +1450,16 @@ fun DataExfiltrationMonitorTab(context: Context) {
                                             }
                                             context.startActivity(uninstallIntent)
                                         },
-                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDC2626)),
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3B1D1D)),
+                                        shape = RoundedCornerShape(10.dp),
                                         modifier = Modifier.weight(1f)
                                     ) {
-                                        Text("Uninstall App", fontSize = 11.sp)
+                                        Text("Uninstall", fontSize = 12.sp, color = DangerSoft)
                                     }
                                 }
                             }
                         }
                     }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun ShieldDashboardTab(
-    context: Context,
-    totalBlocked: Int,
-    blockedTrackers: Int,
-    onOpenPricing: () -> Unit
-) {
-    var blockAllApk by remember { mutableStateOf(ShieldRepository.isBlockAllApkEnabled(context)) }
-    var blockUnknownSources by remember { mutableStateOf(ShieldRepository.isBlockUnknownSourcesSettingsEnabled(context)) }
-    var autoDeleteApks by remember { mutableStateOf(ShieldRepository.isAutoDeleteDownloadedApks(context)) }
-    var blockLinks by remember { mutableStateOf(ShieldRepository.isBlockMaliciousLinksEnabled(context)) }
-    var detectGhostApps by remember { mutableStateOf(ShieldRepository.isDetectInvisibleAppsEnabled(context)) }
-    var allowPlayUpdates by remember { mutableStateOf(ShieldRepository.isAllowPlayStoreUpdates(context)) }
-
-    var isAccessibilityActive by remember { mutableStateOf(isAccessibilityServiceEnabled(context)) }
-    var isNotificationGuardActive by remember { mutableStateOf(isNotificationListenerEnabled(context)) }
-    var isDeviceAdminActive by remember { mutableStateOf(ShieldDeviceAdminReceiver.isAdminActive(context)) }
-    var isVpnRunning by remember { mutableStateOf(TrackerBlockVpnService.isVpnActive) }
-
-    // Google Play Mandatory Prominent Disclosure state
-    var pendingDisclosure by remember { mutableStateOf<ProminentDisclosureType?>(null) }
-
-    // Everyday helpful people-protection checks
-    val remoteScamApps = remember { PeopleProtectionTools.detectRemoteAccessScamApps(context) }
-    val wifiReport = remember { PeopleProtectionTools.auditNetworkProxySafety(context) }
-    val regionalPrice = remember { RegionalPricingManager.getCurrentUserRegionalPrice() }
-
-    val vpnLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) {
-        val startIntent = Intent(context, TrackerBlockVpnService::class.java).apply {
-            action = TrackerBlockVpnService.ACTION_START
-        }
-        context.startService(startIntent)
-        isVpnRunning = true
-    }
-
-    pendingDisclosure?.let { disclosure ->
-        ProminentDisclosureModal(
-            disclosure = disclosure,
-            onAccept = {
-                pendingDisclosure = null
-                when (disclosure) {
-                    ProminentDisclosureType.ACCESSIBILITY -> {
-                        context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-                    }
-                    ProminentDisclosureType.NOTIFICATION_LISTENER -> {
-                        context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
-                    }
-                    ProminentDisclosureType.VPN_FIREWALL -> {
-                        val prepare = VpnService.prepare(context)
-                        if (prepare != null) {
-                            vpnLauncher.launch(prepare)
-                        } else {
-                            val startIntent = Intent(context, TrackerBlockVpnService::class.java).apply {
-                                action = TrackerBlockVpnService.ACTION_START
-                            }
-                            context.startService(startIntent)
-                            isVpnRunning = true
-                        }
-                    }
-                    ProminentDisclosureType.DEVICE_ADMIN -> {
-                        val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
-                            putExtra(
-                                DevicePolicyManager.EXTRA_DEVICE_ADMIN,
-                                ShieldDeviceAdminReceiver.getComponentName(context)
-                            )
-                            putExtra(
-                                DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-                                "Prevents unauthorized uninstallation of ZeroInstall Shield and enforces OS-level restrictions against unknown APK sources."
-                            )
-                        }
-                        context.startActivity(intent)
-                    }
-                    ProminentDisclosureType.USAGE_AND_NETWORK_STATS -> {
-                        context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
-                    }
-                }
-            },
-            onDecline = { pendingDisclosure = null }
-        )
-    }
-
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
-    ) {
-        item {
-            Card(
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF172554)),
-                shape = RoundedCornerShape(18.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(1.dp, Color(0xFF3B82F6), RoundedCornerShape(18.dp))
-            ) {
-                Column(modifier = Modifier.padding(18.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .background(Color(0xFF1D4ED8), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                Icons.Default.VerifiedUser,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(28.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(14.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = if (blockAllApk) "ZEROINSTALL LOCKDOWN ACTIVE" else "PROTECTION PAUSED",
-                                color = if (blockAllApk) Color(0xFF34D399) else Color(0xFFF87171),
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 15.sp
-                            )
-                            Text(
-                                text = "Google Play Compliant • 100% On-Device APK, Link & Data Guard",
-                                color = Color(0xFFBFDBFE),
-                                fontSize = 12.sp
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        StatPill("Threats Stopped", "$totalBlocked", Color(0xFFEF4444))
-                        StatPill("Trackers Blocked", "$blockedTrackers", Color(0xFFA855F7))
-                        StatPill("Session Monitor", "ONLINE", Color(0xFF10B981))
-                    }
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    Button(
-                        onClick = {
-                            ShieldRepository.recordAndAlertThreat(
-                                context = context,
-                                type = ThreatType.BACKGROUND_SESSION_BLOCKED,
-                                severity = Severity.CRITICAL,
-                                sourcePackageOrUrl = "https://stealth-drop-cdn.ngrok-free.app/silent_tracker_v4.apk",
-                                title = "🛑 [SIMULATION] Stealth Background APK Blocked!",
-                                description = "Simulated Attack: A hidden link attempted to drop and silently install 'SystemUpdateService.apk' (Invisible Background Tracker) without a launcher icon.",
-                                actionTaken = "Terminated PackageInstaller Session & Quarantined Payload",
-                                showFullScreenPopup = true
-                            )
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDC2626)),
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(Icons.Default.BugReport, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Simulate Stealth APK & Tracker Link Attack", fontWeight = FontWeight.Bold)
-                    }
-                }
-            }
-        }
-
-        // People-First Feature: Bank Call & Screen-Share Scam Check + Wi-Fi Proxy Check
-        item {
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = if (remoteScamApps.isNotEmpty() || wifiReport.isProxyDetected) {
-                        Color(0xFF3B0D0D)
-                    } else {
-                        Color(0xFF062E22)
-                    }
-                ),
-                shape = RoundedCornerShape(14.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.padding(14.dp)) {
-                    Text(
-                        text = "🛡️ BANK CALL & SCREEN-SHARE SCAM CHECK",
-                        color = Color(0xFF34D399),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    if (remoteScamApps.isEmpty()) {
-                        Text(
-                            text = "✅ No Remote Screen-Sharing Apps Found (Safe from AnyDesk/TeamViewer OTP Theft)",
-                            color = Color.White,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 13.sp
-                        )
-                    } else {
-                        remoteScamApps.forEach { app ->
-                            Text(
-                                text = "🚨 WARNING: ${app.appName} is installed! ${app.dangerExplanation}",
-                                color = Color(0xFFFCA5A5),
-                                fontSize = 12.sp
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = wifiReport.statusTitle,
-                        color = if (wifiReport.isProxyDetected) Color(0xFFFBBF24) else Color(0xFFA7F3D0),
-                        fontSize = 12.sp
-                    )
-                }
-            }
-        }
-
-        item {
-            Text(
-                text = "ACTIVE ENFORCEMENT ENGINES (WITH PLAY STORE DISCLOSURE)",
-                color = Color(0xFF94A3B8),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        item {
-            EnginePermissionCard(
-                title = "1. Real-Time APK Installer Interceptor",
-                subtitle = "Warns & stops unauthorized APK install dialogs and 'Install Unknown Apps' settings.",
-                isEnabled = isAccessibilityActive,
-                buttonText = if (isAccessibilityActive) "Configured" else "Enable Blocker",
-                onClick = {
-                    if (isAccessibilityActive) {
-                        context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-                    } else {
-                        pendingDisclosure = ProminentDisclosureType.ACCESSIBILITY
-                    }
-                },
-                onRefresh = { isAccessibilityActive = isAccessibilityServiceEnabled(context) }
-            )
-        }
-
-        item {
-            EnginePermissionCard(
-                title = "2. WhatsApp / SMS / Telegram Link Guard",
-                subtitle = "Scans incoming message notifications for hidden .apk files, redirect droppers & spyware links.",
-                isEnabled = isNotificationGuardActive,
-                buttonText = if (isNotificationGuardActive) "Active" else "Enable Guard",
-                onClick = {
-                    if (isNotificationGuardActive) {
-                        context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
-                    } else {
-                        pendingDisclosure = ProminentDisclosureType.NOTIFICATION_LISTENER
-                    }
-                },
-                onRefresh = { isNotificationGuardActive = isNotificationListenerEnabled(context) }
-            )
-        }
-
-        item {
-            EnginePermissionCard(
-                title = "3. Background Tracker & Spyware VPN Firewall",
-                subtitle = "Blocks background apps from communicating with stalkerware servers (mSpy, FlexiSpy, Cerberus, etc.).",
-                isEnabled = isVpnRunning,
-                buttonText = if (isVpnRunning) "Stop VPN" else "Start Firewall",
-                onClick = {
-                    if (isVpnRunning) {
-                        val stopIntent = Intent(context, TrackerBlockVpnService::class.java).apply {
-                            action = TrackerBlockVpnService.ACTION_STOP
-                        }
-                        context.startService(stopIntent)
-                        isVpnRunning = false
-                    } else {
-                        pendingDisclosure = ProminentDisclosureType.VPN_FIREWALL
-                    }
-                },
-                onRefresh = { isVpnRunning = TrackerBlockVpnService.isVpnActive }
-            )
-        }
-
-        item {
-            EnginePermissionCard(
-                title = "4. Device Admin Anti-Uninstall & OS Policy Lock",
-                subtitle = "Prevents attackers or malware from uninstalling ZeroInstall Shield in the background.",
-                isEnabled = isDeviceAdminActive,
-                buttonText = if (isDeviceAdminActive) "Protected" else "Activate Admin",
-                onClick = {
-                    pendingDisclosure = ProminentDisclosureType.DEVICE_ADMIN
-                },
-                onRefresh = { isDeviceAdminActive = ShieldDeviceAdminReceiver.isAdminActive(context) }
-            )
-        }
-
-        // Regional Fair Pricing Card
-        item {
-            Card(
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1B4B)),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onOpenPricing() }
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "🌍 FAIR REGIONAL PRICING (${regionalPrice.countryName})",
-                            color = Color(0xFFA5B4FC),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 11.sp
-                        )
-                        Text(
-                            text = "Core Protection is 100% Free • Pro is ${regionalPrice.monthlyPriceFormatted}",
-                            color = Color.White,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 14.sp
-                        )
-                        Text(
-                            text = "${regionalPrice.pppDiscountNote} — Tap to view global income-adjusted pricing",
-                            color = Color(0xFFC7D2FE),
-                            fontSize = 11.sp
-                        )
-                    }
-                    Icon(
-                        Icons.Default.ChevronRight,
-                        contentDescription = null,
-                        tint = Color.White
-                    )
-                }
-            }
-        }
-
-        item {
-            Text(
-                text = "LOCKDOWN SECURITY POLICIES",
-                color = Color(0xFF94A3B8),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        item {
-            Card(
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF151C2C)),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    PolicySwitchRow(
-                        title = "Block All APK Installations",
-                        subtitle = "Stop all .apk, .xapk, .apkm & background PackageInstaller sessions",
-                        checked = blockAllApk,
-                        onCheckedChange = {
-                            blockAllApk = it
-                            ShieldRepository.setBlockAllApkEnabled(context, it)
-                            ShieldDeviceAdminReceiver.enforceOsLevelApkBlockIfPossible(context, it)
-                        }
-                    )
-                    HorizontalDivider(color = Color(0xFF1E293B))
-                    PolicySwitchRow(
-                        title = "Lock 'Install Unknown Apps' Settings",
-                        subtitle = "Prevent enabling Unknown Sources permission in Android Settings",
-                        checked = blockUnknownSources,
-                        onCheckedChange = {
-                            blockUnknownSources = it
-                            ShieldRepository.setBlockUnknownSourcesSettingsEnabled(context, it)
-                        }
-                    )
-                    HorizontalDivider(color = Color(0xFF1E293B))
-                    PolicySwitchRow(
-                        title = "Auto-Quarantine Downloaded APKs",
-                        subtitle = "Automatically remove newly downloaded .apk payloads via DownloadManager",
-                        checked = autoDeleteApks,
-                        onCheckedChange = {
-                            autoDeleteApks = it
-                            ShieldRepository.setAutoDeleteDownloadedApks(context, it)
-                        }
-                    )
-                    HorizontalDivider(color = Color(0xFF1E293B))
-                    PolicySwitchRow(
-                        title = "Block Malicious & Redirect APK Links",
-                        subtitle = "Stop drive-by download links, raw IP droppers, and intent:// exploits",
-                        checked = blockLinks,
-                        onCheckedChange = {
-                            blockLinks = it
-                            ShieldRepository.setBlockMaliciousLinksEnabled(context, it)
-                        }
-                    )
-                    HorizontalDivider(color = Color(0xFF1E293B))
-                    PolicySwitchRow(
-                        title = "Detect Invisible / Iconless Ghost Apps",
-                        subtitle = "Alert immediately if an app installs without a launcher icon",
-                        checked = detectGhostApps,
-                        onCheckedChange = {
-                            detectGhostApps = it
-                            ShieldRepository.setDetectInvisibleAppsEnabled(context, it)
-                        }
-                    )
-                    HorizontalDivider(color = Color(0xFF1E293B))
-                    PolicySwitchRow(
-                        title = "Allow Official Google Play Store Updates",
-                        subtitle = "Permit verified Play Store updates while blocking all sideloaded APKs",
-                        checked = allowPlayUpdates,
-                        onCheckedChange = {
-                            allowPlayUpdates = it
-                            ShieldRepository.setAllowPlayStoreUpdates(context, it)
-                        }
-                    )
                 }
             }
         }
@@ -1189,7 +1499,7 @@ fun GhostAndSpywareAuditTab(context: Context) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(horizontal = 18.dp, vertical = 8.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -1198,19 +1508,19 @@ fun GhostAndSpywareAuditTab(context: Context) {
         ) {
             Column {
                 Text(
-                    text = "Invisible Apps & Tracker Auditor",
-                    color = Color.White,
+                    text = "App Security Audit",
+                    color = TextPrimary,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )
                 Text(
-                    text = "Detects iconless background apps, sideloaded APKs & stalkerware",
-                    color = Color(0xFF94A3B8),
+                    text = "Scan for hidden iconless apps & sideloaded installers",
+                    color = TextSecondary,
                     fontSize = 12.sp
                 )
             }
             IconButton(onClick = { triggerScan() }) {
-                Icon(Icons.Default.Refresh, contentDescription = "Rescan", tint = Color(0xFF38BDF8))
+                Icon(Icons.Default.Refresh, contentDescription = "Rescan", tint = EmeraldSoft)
             }
         }
 
@@ -1220,17 +1530,17 @@ fun GhostAndSpywareAuditTab(context: Context) {
             FilterChip(
                 selected = filterMode == 0,
                 onClick = { filterMode = 0 },
-                label = { Text("Risky / Sideloaded") }
+                label = { Text("Needs Review", fontSize = 11.sp) }
             )
             FilterChip(
                 selected = filterMode == 1,
                 onClick = { filterMode = 1 },
-                label = { Text("👻 Invisible (No Icon)") }
+                label = { Text("Hidden Icon", fontSize = 11.sp) }
             )
             FilterChip(
                 selected = filterMode == 2,
                 onClick = { filterMode = 2 },
-                label = { Text("All User Apps (${allApps.size})") }
+                label = { Text("All Apps (${allApps.size})", fontSize = 11.sp) }
             )
         }
 
@@ -1239,32 +1549,49 @@ fun GhostAndSpywareAuditTab(context: Context) {
         if (isScanning) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CircularProgressIndicator(color = Color(0xFF38BDF8))
+                    CircularProgressIndicator(color = EmeraldSoft)
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        "Scanning installed packages for hidden apps & spyware permissions...",
-                        color = Color(0xFF94A3B8),
+                        "Checking installed apps...",
+                        color = TextSecondary,
                         fontSize = 13.sp
                     )
                 }
             }
         } else if (filteredApps.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(
-                    "✅ No invisible ghost apps or high-risk sideloaded packages found in this view!",
-                    color = Color(0xFF34D399),
-                    fontSize = 14.sp
-                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        Icons.Default.VerifiedUser,
+                        contentDescription = null,
+                        tint = EmeraldSoft,
+                        modifier = Modifier.size(44.dp)
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        "No hidden or high-risk apps found",
+                        color = TextPrimary,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 15.sp
+                    )
+                    Text(
+                        "All scanned applications have normal launcher icons.",
+                        color = TextSecondary,
+                        fontSize = 12.sp
+                    )
+                }
             }
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(filteredApps, key = { it.packageName }) { item ->
                     Card(
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF151C2C)),
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        colors = CardDefaults.cardColors(containerColor = SurfaceCard),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .border(1.dp, BorderSubtle, RoundedCornerShape(16.dp))
                     ) {
-                        Column(modifier = Modifier.padding(14.dp)) {
+                        Column(modifier = Modifier.padding(16.dp)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -1273,27 +1600,35 @@ fun GhostAndSpywareAuditTab(context: Context) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = item.appName,
-                                        color = Color.White,
+                                        color = TextPrimary,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 15.sp
                                     )
                                     Text(
                                         text = item.packageName,
-                                        color = Color(0xFF64748B),
+                                        color = TextSecondary,
                                         fontSize = 11.sp
                                     )
                                 }
                                 Surface(
                                     color = when {
-                                        item.riskScore >= 60 -> Color(0xFFDC2626)
-                                        item.riskScore >= 30 -> Color(0xFFD97706)
-                                        else -> Color(0xFF059669)
+                                        item.riskScore >= 60 -> Color(0xFF3B1D1D)
+                                        item.riskScore >= 30 -> Color(0xFF2E1F05)
+                                        else -> EmeraldDark
                                     },
                                     shape = RoundedCornerShape(50)
                                 ) {
                                     Text(
-                                        text = "Risk ${item.riskScore}/100",
-                                        color = Color.White,
+                                        text = when {
+                                            item.riskScore >= 60 -> "High Risk"
+                                            item.riskScore >= 30 -> "Review"
+                                            else -> "Verified"
+                                        },
+                                        color = when {
+                                            item.riskScore >= 60 -> DangerSoft
+                                            item.riskScore >= 30 -> GoldPro
+                                            else -> EmeraldSoft
+                                        },
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
                                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
@@ -1305,40 +1640,16 @@ fun GhostAndSpywareAuditTab(context: Context) {
                                 Spacer(modifier = Modifier.height(8.dp))
                                 item.riskReasons.forEach { reason ->
                                     Text(
-                                        text = reason,
-                                        color = Color(0xFFFCA5A5),
+                                        text = "• $reason",
+                                        color = TextSecondary,
                                         fontSize = 12.sp
                                     )
                                 }
                             }
 
-                            if (item.dangerousPermissions.isNotEmpty()) {
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Text(
-                                    text = "Capabilities: ${item.dangerousPermissions.joinToString(", ")}",
-                                    color = Color(0xFFFBBF24),
-                                    fontSize = 11.sp
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
 
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Button(
-                                    onClick = {
-                                        val uninstallIntent = Intent(Intent.ACTION_DELETE).apply {
-                                            data = Uri.parse("package:${item.packageName}")
-                                        }
-                                        context.startActivity(uninstallIntent)
-                                    },
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDC2626)),
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text("Uninstall", fontSize = 12.sp)
-                                }
-
                                 OutlinedButton(
                                     onClick = {
                                         val infoIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
@@ -1346,9 +1657,24 @@ fun GhostAndSpywareAuditTab(context: Context) {
                                         }
                                         context.startActivity(infoIntent)
                                     },
+                                    shape = RoundedCornerShape(10.dp),
                                     modifier = Modifier.weight(1f)
                                 ) {
-                                    Text("Force Stop / Info", fontSize = 12.sp)
+                                    Text("App Info", fontSize = 12.sp, color = TextPrimary)
+                                }
+
+                                Button(
+                                    onClick = {
+                                        val uninstallIntent = Intent(Intent.ACTION_DELETE).apply {
+                                            data = Uri.parse("package:${item.packageName}")
+                                        }
+                                        context.startActivity(uninstallIntent)
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3B1D1D)),
+                                    shape = RoundedCornerShape(10.dp),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text("Uninstall", fontSize = 12.sp, color = DangerSoft)
                                 }
                             }
                         }
@@ -1366,41 +1692,40 @@ fun LinkScannerTab(context: Context) {
     var isScanning by remember { mutableStateOf(false) }
     var scanResult by remember { mutableStateOf<LinkScanResult?>(null) }
 
-    val sampleAttackLinks = listOf(
+    val sampleLinks = listOf(
         "https://promo-reward-claim.ngrok-free.app/kyc-update.apk",
-        "intent://scan/#Intent;scheme=package;action=android.intent.action.INSTALL_PACKAGE;end",
-        "http://185.199.108.153/silent-install/bg-tracker.dex",
         "https://www.google.com"
     )
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(horizontal = 18.dp, vertical = 8.dp)
     ) {
         Text(
-            text = "Deep Link & Invisible Dropper Scanner",
-            color = Color.White,
+            text = "Safe Link Checker",
+            color = TextPrimary,
             fontWeight = FontWeight.Bold,
             fontSize = 18.sp
         )
         Text(
-            text = "Inspects URLs, redirect chains & HTTP headers for hidden APK payloads without opening them in your browser.",
-            color = Color(0xFF94A3B8),
+            text = "Check any link from SMS, WhatsApp, or Email for hidden APK downloads before opening it.",
+            color = TextSecondary,
             fontSize = 12.sp
         )
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = urlInput,
             onValueChange = { urlInput = it },
-            label = { Text("Paste suspicious link from SMS / WhatsApp / Email") },
+            label = { Text("Paste link here...") },
             singleLine = true,
+            shape = RoundedCornerShape(14.dp),
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         Button(
             onClick = {
@@ -1418,48 +1743,55 @@ fun LinkScannerTab(context: Context) {
                             type = ThreatType.MALICIOUS_LINK_BLOCKED,
                             severity = Severity.CRITICAL,
                             sourcePackageOrUrl = result.url,
-                            title = "🛑 Malicious APK / Tracker Link Detected!",
+                            title = "Suspicious Link Blocked",
                             description = result.reasons.joinToString("\n• ", prefix = "• "),
-                            actionTaken = "Blocked by Link Guard",
+                            actionTaken = "Flagged by Safe Link Checker",
                             showFullScreenPopup = false
                         )
                     }
                 }
             },
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB))
+            shape = RoundedCornerShape(14.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = EmeraldPrimary)
         ) {
-            Icon(Icons.Default.Radar, contentDescription = null)
+            Icon(Icons.Default.Search, contentDescription = null, tint = Color.White)
             Spacer(modifier = Modifier.width(8.dp))
-            Text(if (isScanning) "Inspecting Headers & Redirects..." else "Scan Link Safely")
+            Text(
+                if (isScanning) "Checking Link Safety..." else "Check Link Safety",
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "TAP A SAMPLE LINK TO TEST DETECTION:",
-            color = Color(0xFF94A3B8),
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold
+            text = "Try an example link:",
+            color = TextSecondary,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium
         )
         Spacer(modifier = Modifier.height(6.dp))
 
-        sampleAttackLinks.forEach { sample ->
+        sampleLinks.forEach { sample ->
             Surface(
-                color = Color(0xFF151C2C),
-                shape = RoundedCornerShape(8.dp),
+                color = SurfaceCard,
+                shape = RoundedCornerShape(10.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 3.dp)
+                    .border(1.dp, BorderSubtle, RoundedCornerShape(10.dp))
                     .clickable { urlInput = sample }
             ) {
                 Text(
                     text = sample,
-                    color = Color(0xFF38BDF8),
-                    fontSize = 11.sp,
+                    color = SkyAccent,
+                    fontSize = 12.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(10.dp)
+                    modifier = Modifier.padding(12.dp)
                 )
             }
         }
@@ -1469,32 +1801,34 @@ fun LinkScannerTab(context: Context) {
         scanResult?.let { res ->
             Card(
                 colors = CardDefaults.cardColors(
-                    containerColor = if (res.isThreat) Color(0xFF3B0D0D) else Color(0xFF062E22)
+                    containerColor = if (res.isThreat) Color(0xFF2A1417) else Color(0xFF0A2E24)
                 ),
-                shape = RoundedCornerShape(14.dp),
-                modifier = Modifier.fillMaxWidth()
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(
+                        1.dp,
+                        if (res.isThreat) DangerSoft.copy(alpha = 0.4f) else EmeraldPrimary.copy(alpha = 0.4f),
+                        RoundedCornerShape(16.dp)
+                    )
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = if (res.isThreat) {
-                            "🚨 DANGER: BLOCKED APK / SPYWARE LINK (Score: ${res.threatScore}/100)"
-                        } else {
-                            "✅ SAFE: No APK Payload or Tracker Found (Score: ${res.threatScore}/100)"
-                        },
-                        color = if (res.isThreat) Color(0xFFF87171) else Color(0xFF34D399),
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 15.sp
+                        text = if (res.isThreat) "Unsafe Link Detected" else "Link Appears Safe",
+                        color = if (res.isThreat) DangerSoft else EmeraldSoft,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
                     if (res.reasons.isEmpty()) {
                         Text(
-                            "No suspicious APK extensions, intent:// schemes, or malware headers detected.",
-                            color = Color.White,
+                            "No APK downloads or suspicious redirects were found in this link.",
+                            color = TextPrimary,
                             fontSize = 13.sp
                         )
                     } else {
                         res.reasons.forEach { reason ->
-                            Text("• $reason", color = Color(0xFFFECACA), fontSize = 13.sp)
+                            Text("• $reason", color = TextPrimary, fontSize = 13.sp)
                         }
                     }
                 }
@@ -1505,89 +1839,104 @@ fun LinkScannerTab(context: Context) {
 
 @Composable
 fun ThreatHistoryTab(context: Context, events: List<ThreatEvent>) {
-    val fmt = remember { SimpleDateFormat("dd MMM HH:mm:ss", Locale.getDefault()) }
+    val fmt = remember { SimpleDateFormat("dd MMM, hh:mm a", Locale.getDefault()) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(horizontal = 18.dp, vertical = 8.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "Blocked Attempts & Security Log",
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
-            )
+            Column {
+                Text(
+                    text = "Security Activity",
+                    color = TextPrimary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+                Text(
+                    text = "Recent protection events & blocked install attempts",
+                    color = TextSecondary,
+                    fontSize = 12.sp
+                )
+            }
             if (events.isNotEmpty()) {
                 TextButton(onClick = { ShieldRepository.clearLogs(context) }) {
-                    Text("Clear Log", color = Color(0xFFF87171))
+                    Text("Clear", color = TextSecondary)
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         if (events.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(
-                    "No blocked threats recorded yet. Tap 'Simulate Stealth APK Attack' on the Shield tab to test!",
-                    color = Color(0xFF64748B),
-                    fontSize = 13.sp
-                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        Icons.Default.VerifiedUser,
+                        contentDescription = null,
+                        tint = EmeraldSoft,
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        "No recent threats detected",
+                        color = TextPrimary,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp
+                    )
+                    Text(
+                        "Your device is clean. Any blocked APK installs or risky links will appear here.",
+                        color = TextSecondary,
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp)
+                    )
+                }
             }
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 items(events, key = { it.id }) { ev ->
                     Card(
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF151C2C)),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        colors = CardDefaults.cardColors(containerColor = SurfaceCard),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .border(1.dp, BorderSubtle, RoundedCornerShape(16.dp))
                     ) {
-                        Column(modifier = Modifier.padding(14.dp)) {
+                        Column(modifier = Modifier.padding(16.dp)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    text = ev.type.title,
-                                    color = Color(ev.type.badgeColorHex),
+                                    text = ev.title,
+                                    color = TextPrimary,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 11.sp
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.weight(1f)
                                 )
                                 Text(
                                     text = fmt.format(Date(ev.timestamp)),
-                                    color = Color(0xFF64748B),
+                                    color = TextSecondary,
                                     fontSize = 11.sp
                                 )
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = ev.title,
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
                                 text = ev.description,
-                                color = Color(0xFFCBD5E1),
+                                color = TextSecondary,
                                 fontSize = 12.sp
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "Source: ${ev.sourcePackageOrUrl}",
-                                color = Color(0xFFFBBF24),
-                                fontSize = 11.sp
-                            )
-                            Text(
-                                text = "Action: ${ev.actionTaken}",
-                                color = Color(0xFF34D399),
-                                fontSize = 11.sp,
+                                text = ev.actionTaken,
+                                color = EmeraldSoft,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
                         }
@@ -1599,64 +1948,127 @@ fun ThreatHistoryTab(context: Context, events: List<ThreatEvent>) {
 }
 
 @Composable
-private fun StatPill(label: String, value: String, color: Color) {
+private fun MetricTile(
+    modifier: Modifier = Modifier,
+    value: String,
+    label: String,
+    valueColor: Color
+) {
     Surface(
-        color = Color(0xFF0F172A),
-        shape = RoundedCornerShape(10.dp)
+        color = BgDeepSlate.copy(alpha = 0.55f),
+        shape = RoundedCornerShape(14.dp),
+        modifier = modifier.border(1.dp, Color.White.copy(alpha = 0.07f), RoundedCornerShape(14.dp))
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            modifier = Modifier.padding(vertical = 10.dp, horizontal = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = value, color = color, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
-            Text(text = label, color = Color(0xFF94A3B8), fontSize = 10.sp)
+            Text(text = value, color = valueColor, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(text = label, color = TextSecondary, fontSize = 10.sp, maxLines = 1)
         }
     }
 }
 
 @Composable
 private fun EnginePermissionCard(
+    icon: ImageVector,
     title: String,
     subtitle: String,
     isEnabled: Boolean,
+    isProFeature: Boolean,
+    isProUnlocked: Boolean,
     buttonText: String,
     onClick: () -> Unit,
     onRefresh: () -> Unit
 ) {
     Card(
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF151C2C)),
-        shape = RoundedCornerShape(14.dp),
-        modifier = Modifier.fillMaxWidth()
+        colors = CardDefaults.cardColors(containerColor = SurfaceCard),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, BorderSubtle, RoundedCornerShape(16.dp))
     ) {
         Row(
-            modifier = Modifier.padding(14.dp),
+            modifier = Modifier.padding(15.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(12.dp)
+                    .size(40.dp)
                     .background(
-                        if (isEnabled) Color(0xFF10B981) else Color(0xFFF59E0B),
-                        CircleShape
-                    )
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                Text(text = subtitle, color = Color(0xFF94A3B8), fontSize = 11.sp)
+                        if (isEnabled) EmeraldDark.copy(alpha = 0.7f) else SurfaceElevated,
+                        RoundedCornerShape(12.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = if (isEnabled) EmeraldSoft else SkyAccent,
+                    modifier = Modifier.size(20.dp)
+                )
             }
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(14.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = title,
+                        color = TextPrimary,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp
+                    )
+                    if (isProFeature && !isProUnlocked) {
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Surface(
+                            color = GoldPro.copy(alpha = 0.2f),
+                            shape = RoundedCornerShape(50),
+                            modifier = Modifier.border(1.dp, GoldPro.copy(alpha = 0.6f), RoundedCornerShape(50))
+                        ) {
+                            Text(
+                                text = "PRO",
+                                color = GoldSoft,
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = subtitle,
+                    color = TextSecondary,
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp
+                )
+            }
+            Spacer(modifier = Modifier.width(10.dp))
             Button(
                 onClick = {
                     onClick()
                     onRefresh()
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isEnabled) Color(0xFF065F46) else Color(0xFF2563EB)
+                    containerColor = when {
+                        isProFeature && !isProUnlocked -> Color(0xFF2E1F05)
+                        isEnabled -> EmeraldDark
+                        else -> SurfaceElevated
+                    }
                 ),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                shape = RoundedCornerShape(10.dp),
+                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
             ) {
-                Text(text = buttonText, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    text = buttonText,
+                    color = when {
+                        isProFeature && !isProUnlocked -> GoldSoft
+                        isEnabled -> EmeraldSoft
+                        else -> TextPrimary
+                    },
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }
@@ -1672,14 +2084,22 @@ private fun PolicySwitchRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = title, color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-            Text(text = subtitle, color = Color(0xFF94A3B8), fontSize = 11.sp)
+            Text(text = title, color = TextPrimary, fontWeight = FontWeight.Medium, fontSize = 14.sp)
+            Text(text = subtitle, color = TextSecondary, fontSize = 11.sp)
         }
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
+        Spacer(modifier = Modifier.width(8.dp))
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                checkedTrackColor = EmeraldPrimary
+            )
+        )
     }
 }
 
