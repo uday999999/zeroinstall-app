@@ -13,13 +13,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -28,7 +29,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -64,20 +64,21 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-// Modern, Calm, Trustworthy Color Palette
-private val BgDeepSlate = Color(0xFF0A0F1D)
-private val SurfaceCard = Color(0xFF131B2E)
-private val SurfaceElevated = Color(0xFF1A2540)
-private val BorderSubtle = Color(0xFF1E293B)
+// Cohesive, Uplifting, Positive & Secure Emerald-Teal + Sky-Cyan Palette
+private val BgDeepSlate = Color(0xFF081221)
+private val SurfaceCard = Color(0xFF101F36)
+private val SurfaceElevated = Color(0xFF172B49)
+private val BorderSubtle = Color(0xFF1E385B)
 private val EmeraldPrimary = Color(0xFF10B981)
-private val EmeraldSoft = Color(0xFF34D399)
+private val EmeraldSoft = Color(0xFF6EE7B7)
 private val EmeraldDark = Color(0xFF064E3B)
-private val SkyAccent = Color(0xFF38BDF8)
-private val GoldPro = Color(0xFFF59E0B)
-private val GoldSoft = Color(0xFFFDE68A)
+private val CyanPrimary = Color(0xFF0EA5E9)
+private val CyanSoft = Color(0xFF7DD3FC)
+private val CyanDark = Color(0xFF0C3559)
 private val TextPrimary = Color(0xFFF8FAFC)
 private val TextSecondary = Color(0xFF94A3B8)
-private val DangerSoft = Color(0xFFF87171)
+private val DangerSoft = Color(0xFFFCA5A5)
+private val DangerBg = Color(0xFF3B1A22)
 
 class MainActivity : ComponentActivity() {
 
@@ -90,7 +91,7 @@ class MainActivity : ComponentActivity() {
             MaterialTheme(
                 colorScheme = darkColorScheme(
                     primary = EmeraldPrimary,
-                    secondary = SkyAccent,
+                    secondary = CyanPrimary,
                     background = BgDeepSlate,
                     surface = SurfaceCard
                 )
@@ -101,7 +102,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ApkShieldMainApp() {
     val context = LocalContext.current
@@ -138,7 +139,6 @@ fun ApkShieldMainApp() {
 
     Scaffold(
         topBar = {
-            // Extra top margin so center camera cutout on Samsung/Android phones never overlaps text
             Surface(
                 color = BgDeepSlate,
                 modifier = Modifier.fillMaxWidth()
@@ -157,12 +157,12 @@ fun ApkShieldMainApp() {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(
                                 modifier = Modifier
-                                    .size(36.dp)
+                                    .size(38.dp)
                                     .background(
                                         Brush.linearGradient(
-                                            listOf(EmeraldPrimary, Color(0xFF0284C7))
+                                            listOf(EmeraldPrimary, CyanPrimary)
                                         ),
-                                        RoundedCornerShape(10.dp)
+                                        RoundedCornerShape(11.dp)
                                     ),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -170,7 +170,7 @@ fun ApkShieldMainApp() {
                                     imageVector = Icons.Default.VerifiedUser,
                                     contentDescription = null,
                                     tint = Color.White,
-                                    modifier = Modifier.size(20.dp)
+                                    modifier = Modifier.size(21.dp)
                                 )
                             }
                             Spacer(modifier = Modifier.width(12.dp))
@@ -182,39 +182,45 @@ fun ApkShieldMainApp() {
                                     color = TextPrimary
                                 )
                                 Text(
-                                    text = "Mobile Security & APK Guard",
+                                    text = "Smart APK & Privacy Shield",
                                     fontSize = 11.sp,
-                                    color = TextSecondary
+                                    color = CyanSoft
                                 )
                             }
                         }
 
-                        // Clean Pro Status / Upgrade Pill
-                        Surface(
-                            color = if (isProUnlocked) EmeraldDark else Color(0xFF2E1F05),
-                            shape = RoundedCornerShape(50),
+                        // Cohesive Emerald-Cyan Gradient Pro Pill matching the app theme
+                        Box(
                             modifier = Modifier
+                                .background(
+                                    Brush.horizontalGradient(
+                                        if (isProUnlocked) {
+                                            listOf(EmeraldDark, CyanDark)
+                                        } else {
+                                            listOf(EmeraldPrimary, CyanPrimary)
+                                        }
+                                    ),
+                                    RoundedCornerShape(50)
+                                )
                                 .border(
                                     1.dp,
-                                    if (isProUnlocked) EmeraldPrimary.copy(alpha = 0.5f) else GoldPro.copy(alpha = 0.6f),
+                                    if (isProUnlocked) EmeraldSoft.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.35f),
                                     RoundedCornerShape(50)
                                 )
                                 .clickable { showProModal = true }
+                                .padding(horizontal = 13.dp, vertical = 7.dp)
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
-                                    imageVector = if (isProUnlocked) Icons.Default.CheckCircle else Icons.Default.WorkspacePremium,
+                                    imageVector = if (isProUnlocked) Icons.Default.CheckCircle else Icons.Default.AutoAwesome,
                                     contentDescription = null,
-                                    tint = if (isProUnlocked) EmeraldSoft else GoldPro,
-                                    modifier = Modifier.size(15.dp)
+                                    tint = Color.White,
+                                    modifier = Modifier.size(14.dp)
                                 )
                                 Spacer(modifier = Modifier.width(5.dp))
                                 Text(
-                                    text = if (isProUnlocked) "PRO ACTIVE" else "UPGRADE PRO",
-                                    color = if (isProUnlocked) EmeraldSoft else GoldSoft,
+                                    text = if (isProUnlocked) "PRO ACTIVE" else "PRO SHIELD",
+                                    color = Color.White,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -226,7 +232,7 @@ fun ApkShieldMainApp() {
         },
         bottomBar = {
             NavigationBar(
-                containerColor = Color(0xFF0D1424),
+                containerColor = Color(0xFF0A172A),
                 tonalElevation = 0.dp
             ) {
                 NavigationBarItem(
@@ -237,7 +243,7 @@ fun ApkShieldMainApp() {
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = EmeraldSoft,
                         selectedTextColor = EmeraldSoft,
-                        indicatorColor = EmeraldDark.copy(alpha = 0.6f),
+                        indicatorColor = EmeraldDark.copy(alpha = 0.7f),
                         unselectedIconColor = TextSecondary,
                         unselectedTextColor = TextSecondary
                     )
@@ -245,12 +251,12 @@ fun ApkShieldMainApp() {
                 NavigationBarItem(
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 },
-                    icon = { Icon(Icons.Default.Apps, contentDescription = null) },
+                    icon = { Icon(Icons.Default.FactCheck, contentDescription = null) },
                     label = { Text("App Audit", fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = EmeraldSoft,
                         selectedTextColor = EmeraldSoft,
-                        indicatorColor = EmeraldDark.copy(alpha = 0.6f),
+                        indicatorColor = EmeraldDark.copy(alpha = 0.7f),
                         unselectedIconColor = TextSecondary,
                         unselectedTextColor = TextSecondary
                     )
@@ -262,8 +268,8 @@ fun ApkShieldMainApp() {
                         BadgedBox(
                             badge = {
                                 if (!isProUnlocked) {
-                                    Badge(containerColor = GoldPro) {
-                                        Text("PRO", color = Color.Black, fontSize = 8.sp, fontWeight = FontWeight.ExtraBold)
+                                    Badge(containerColor = CyanPrimary) {
+                                        Text("PRO", color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.ExtraBold)
                                     }
                                 }
                             }
@@ -275,7 +281,7 @@ fun ApkShieldMainApp() {
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = EmeraldSoft,
                         selectedTextColor = EmeraldSoft,
-                        indicatorColor = EmeraldDark.copy(alpha = 0.6f),
+                        indicatorColor = EmeraldDark.copy(alpha = 0.7f),
                         unselectedIconColor = TextSecondary,
                         unselectedTextColor = TextSecondary
                     )
@@ -288,7 +294,7 @@ fun ApkShieldMainApp() {
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = EmeraldSoft,
                         selectedTextColor = EmeraldSoft,
-                        indicatorColor = EmeraldDark.copy(alpha = 0.6f),
+                        indicatorColor = EmeraldDark.copy(alpha = 0.7f),
                         unselectedIconColor = TextSecondary,
                         unselectedTextColor = TextSecondary
                     )
@@ -313,7 +319,7 @@ fun ApkShieldMainApp() {
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = EmeraldSoft,
                         selectedTextColor = EmeraldSoft,
-                        indicatorColor = EmeraldDark.copy(alpha = 0.6f),
+                        indicatorColor = EmeraldDark.copy(alpha = 0.7f),
                         unselectedIconColor = TextSecondary,
                         unselectedTextColor = TextSecondary
                     )
@@ -357,16 +363,16 @@ fun ProminentDisclosureModal(
     AlertDialog(
         onDismissRequest = onDecline,
         containerColor = SurfaceCard,
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(22.dp),
         title = {
             Column {
                 Surface(
-                    color = EmeraldDark,
+                    color = CyanDark,
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
                         text = disclosure.permissionBadge,
-                        color = EmeraldSoft,
+                        color = CyanSoft,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
@@ -396,16 +402,16 @@ fun ProminentDisclosureModal(
                     lineHeight = 19.sp
                 )
                 Surface(
-                    color = Color(0xFF0D1F1A),
+                    color = EmeraldDark.copy(alpha = 0.5f),
                     shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.border(1.dp, EmeraldPrimary.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                    modifier = Modifier.border(1.dp, EmeraldPrimary.copy(alpha = 0.35f), RoundedCornerShape(12.dp))
                 ) {
                     Row(
                         modifier = Modifier.padding(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            Icons.Default.Lock,
+                            Icons.Default.VerifiedUser,
                             contentDescription = null,
                             tint = EmeraldSoft,
                             modifier = Modifier.size(18.dp)
@@ -413,7 +419,7 @@ fun ProminentDisclosureModal(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = disclosure.privacyGuarantee,
-                            color = Color(0xFFA7F3D0),
+                            color = EmeraldSoft,
                             fontSize = 12.sp,
                             lineHeight = 17.sp
                         )
@@ -446,7 +452,7 @@ fun ZeroInstallProDialog(
     onDismiss: () -> Unit
 ) {
     val price = remember { RegionalPricingManager.getCurrentUserRegionalPrice() }
-    var selectedPlan by remember { mutableIntStateOf(0) } // 0 = Annual, 1 = Monthly
+    var selectedPlan by remember { mutableIntStateOf(0) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -456,30 +462,30 @@ fun ZeroInstallProDialog(
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                 Box(
                     modifier = Modifier
-                        .size(52.dp)
+                        .size(54.dp)
                         .background(
-                            Brush.linearGradient(listOf(GoldPro, Color(0xFFD97706))),
+                            Brush.linearGradient(listOf(EmeraldPrimary, CyanPrimary)),
                             CircleShape
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        Icons.Default.WorkspacePremium,
+                        Icons.Default.AutoAwesome,
                         contentDescription = null,
                         tint = Color.White,
-                        modifier = Modifier.size(28.dp)
+                        modifier = Modifier.size(26.dp)
                     )
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    text = "ZeroInstall Pro",
+                    text = "ZeroInstall Pro Shield",
                     color = TextPrimary,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
                 )
                 Text(
                     text = "Complete 24/7 automated protection for your phone",
-                    color = TextSecondary,
+                    color = CyanSoft,
                     fontSize = 12.sp,
                     textAlign = TextAlign.Center
                 )
@@ -494,7 +500,6 @@ fun ZeroInstallProDialog(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // Annual Plan Card
                 Surface(
                     color = if (selectedPlan == 0) EmeraldDark.copy(alpha = 0.5f) else BgDeepSlate,
                     shape = RoundedCornerShape(14.dp),
@@ -516,10 +521,10 @@ fun ZeroInstallProDialog(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text("Annual Plan", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Surface(color = EmeraldPrimary, shape = RoundedCornerShape(50)) {
+                                Surface(color = CyanPrimary, shape = RoundedCornerShape(50)) {
                                     Text(
-                                        "BEST VALUE",
-                                        color = Color.Black,
+                                        "SAVE 50%",
+                                        color = Color.White,
                                         fontSize = 9.sp,
                                         fontWeight = FontWeight.ExtraBold,
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -532,7 +537,6 @@ fun ZeroInstallProDialog(
                     }
                 }
 
-                // Monthly Plan Card
                 Surface(
                     color = if (selectedPlan == 1) EmeraldDark.copy(alpha = 0.5f) else BgDeepSlate,
                     shape = RoundedCornerShape(14.dp),
@@ -581,7 +585,7 @@ fun ZeroInstallProDialog(
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Switch Back to Free Tier (Test Mode)", color = TextSecondary, fontSize = 12.sp)
+                        Text("Switch Back to Free Tier (Preview)", color = TextSecondary, fontSize = 12.sp)
                     }
                 }
                 TextButton(onClick = onDismiss) {
@@ -697,7 +701,7 @@ fun ShieldDashboardTab(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(top = 6.dp, bottom = 28.dp)
     ) {
-        // 1. Calm, Modern Protection Hero Card
+        // 1. Positive, Uplifting Emerald-Cyan Hero Card
         item {
             Card(
                 colors = CardDefaults.cardColors(containerColor = Color.Transparent),
@@ -707,16 +711,16 @@ fun ShieldDashboardTab(
                     .background(
                         Brush.verticalGradient(
                             colors = if (blockAllApk) {
-                                listOf(Color(0xFF0A362B), Color(0xFF111C33))
+                                listOf(Color(0xFF065F46), Color(0xFF0C3559), SurfaceCard)
                             } else {
-                                listOf(Color(0xFF3B1D1D), Color(0xFF111C33))
+                                listOf(Color(0xFF3B1A22), SurfaceCard)
                             }
                         ),
                         RoundedCornerShape(24.dp)
                     )
                     .border(
                         1.dp,
-                        if (blockAllApk) EmeraldPrimary.copy(alpha = 0.35f) else DangerSoft.copy(alpha = 0.35f),
+                        if (blockAllApk) EmeraldSoft.copy(alpha = 0.4f) else DangerSoft.copy(alpha = 0.35f),
                         RoundedCornerShape(24.dp)
                     )
             ) {
@@ -726,12 +730,17 @@ fun ShieldDashboardTab(
                         .padding(22.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Glowing Shield Emblem
                     Box(
                         modifier = Modifier
-                            .size(76.dp)
+                            .size(78.dp)
                             .background(
-                                if (blockAllApk) EmeraldPrimary.copy(alpha = 0.16f) else DangerSoft.copy(alpha = 0.16f),
+                                Brush.linearGradient(
+                                    if (blockAllApk) {
+                                        listOf(EmeraldPrimary.copy(alpha = 0.28f), CyanPrimary.copy(alpha = 0.28f))
+                                    } else {
+                                        listOf(DangerSoft.copy(alpha = 0.2f), DangerSoft.copy(alpha = 0.1f))
+                                    }
+                                ),
                                 CircleShape
                             )
                             .border(
@@ -749,10 +758,10 @@ fun ShieldDashboardTab(
                             )
                         } else {
                             Icon(
-                                imageVector = if (blockAllApk) Icons.Default.VerifiedUser else Icons.Default.GppMaybe,
+                                imageVector = if (blockAllApk) Icons.Default.VerifiedUser else Icons.Default.Shield,
                                 contentDescription = null,
                                 tint = if (blockAllApk) EmeraldSoft else DangerSoft,
-                                modifier = Modifier.size(38.dp)
+                                modifier = Modifier.size(40.dp)
                             )
                         }
                     }
@@ -762,9 +771,9 @@ fun ShieldDashboardTab(
                     Text(
                         text = when {
                             isQuickScanning -> "Scanning Device Security..."
-                            quickScanComplete -> "All Security Checks Passed"
+                            quickScanComplete -> "Your Phone is Safe & Protected"
                             blockAllApk -> "Your Phone is Protected"
-                            else -> "APK Protection is Paused"
+                            else -> "Protection Paused"
                         },
                         color = TextPrimary,
                         fontWeight = FontWeight.Bold,
@@ -774,15 +783,14 @@ fun ShieldDashboardTab(
                     Spacer(modifier = Modifier.height(4.dp))
 
                     Text(
-                        text = "Real-time shield against unauthorized APK installs & scam links",
-                        color = TextSecondary,
+                        text = "Active protection against unauthorized APK installs & scam links",
+                        color = CyanSoft,
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center
                     )
 
                     Spacer(modifier = Modifier.height(18.dp))
 
-                    // Clean 3-column metrics
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -790,40 +798,37 @@ fun ShieldDashboardTab(
                         MetricTile(
                             modifier = Modifier.weight(1f),
                             value = "$totalBlocked",
-                            label = "Threats Blocked",
+                            label = "Blocked",
                             valueColor = TextPrimary
                         )
                         MetricTile(
                             modifier = Modifier.weight(1f),
                             value = "$blockedTrackers",
-                            label = "Trackers Stopped",
-                            valueColor = SkyAccent
+                            label = "Trackers",
+                            valueColor = CyanSoft
                         )
                         MetricTile(
                             modifier = Modifier.weight(1f),
-                            value = if (remoteScamApps.isEmpty() && !wifiReport.isProxyDetected) "Safe" else "Alert",
+                            value = if (remoteScamApps.isEmpty() && !wifiReport.isProxyDetected) "Secure" else "Review",
                             label = "Call & Wi-Fi",
-                            valueColor = if (remoteScamApps.isEmpty() && !wifiReport.isProxyDetected) EmeraldSoft else GoldPro
+                            valueColor = if (remoteScamApps.isEmpty() && !wifiReport.isProxyDetected) EmeraldSoft else CyanSoft
                         )
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Calm, feel-good "Smart Security Scan" button
                     Button(
                         onClick = {
                             if (!isQuickScanning) {
                                 isQuickScanning = true
                                 scope.launch {
-                                    delay(1200)
+                                    delay(1000)
                                     isQuickScanning = false
                                     quickScanComplete = true
                                 }
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = EmeraldPrimary
-                        ),
+                        colors = ButtonDefaults.buttonColors(containerColor = EmeraldPrimary),
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -835,7 +840,7 @@ fun ShieldDashboardTab(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = if (isQuickScanning) "Checking Apps, Network & Installers..." else if (quickScanComplete) "Scan Complete • Tap to Re-Scan" else "Run Quick Security Scan",
+                            text = if (isQuickScanning) "Checking Device..." else if (quickScanComplete) "All Checks Passed • Scan Again" else "Run Quick Security Check",
                             color = Color.White,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 14.sp,
@@ -863,7 +868,7 @@ fun ShieldDashboardTab(
                         modifier = Modifier
                             .size(42.dp)
                             .background(
-                                if (remoteScamApps.isEmpty()) EmeraldDark.copy(alpha = 0.6f) else Color(0xFF3B1D1D),
+                                if (remoteScamApps.isEmpty()) EmeraldDark.copy(alpha = 0.65f) else DangerBg,
                                 RoundedCornerShape(12.dp)
                             ),
                         contentAlignment = Alignment.Center
@@ -885,7 +890,7 @@ fun ShieldDashboardTab(
                         )
                         if (remoteScamApps.isEmpty()) {
                             Text(
-                                text = "No screen-sharing apps (AnyDesk / TeamViewer) detected. Your OTPs are safe.",
+                                text = "No screen-sharing apps (AnyDesk / TeamViewer) found. Your banking OTPs are safe.",
                                 color = TextSecondary,
                                 fontSize = 12.sp,
                                 lineHeight = 17.sp
@@ -893,7 +898,7 @@ fun ShieldDashboardTab(
                         } else {
                             remoteScamApps.forEach { app ->
                                 Text(
-                                    text = "Attention: ${app.appName} is installed on this phone.",
+                                    text = "Review: ${app.appName} is installed on this phone.",
                                     color = DangerSoft,
                                     fontSize = 12.sp
                                 )
@@ -904,7 +909,7 @@ fun ShieldDashboardTab(
             }
         }
 
-        // 3. Protection Layers Section (Free + Pro)
+        // 3. Protection Layers Section
         item {
             Text(
                 text = "Protection Layers",
@@ -918,7 +923,7 @@ fun ShieldDashboardTab(
             EnginePermissionCard(
                 icon = Icons.Default.AppBlocking,
                 title = "APK Install Blocker",
-                subtitle = "Blocks unauthorized APK install popups from browsers and file managers.",
+                subtitle = "Stops unauthorized APK install popups from browsers and file managers.",
                 isEnabled = isAccessibilityActive,
                 isProFeature = false,
                 isProUnlocked = true,
@@ -938,12 +943,12 @@ fun ShieldDashboardTab(
             EnginePermissionCard(
                 icon = Icons.Default.MarkChatRead,
                 title = "WhatsApp & SMS Link Guard",
-                subtitle = "Automatically scans incoming message links for phishing & hidden APKs.",
+                subtitle = "Automatically checks incoming message links for phishing & hidden APKs.",
                 isEnabled = isNotificationGuardActive && isProUnlocked,
                 isProFeature = true,
                 isProUnlocked = isProUnlocked,
                 buttonText = when {
-                    !isProUnlocked -> "Pro"
+                    !isProUnlocked -> "Unlock"
                     isNotificationGuardActive -> "Active"
                     else -> "Enable"
                 },
@@ -969,8 +974,8 @@ fun ShieldDashboardTab(
                 isProFeature = true,
                 isProUnlocked = isProUnlocked,
                 buttonText = when {
-                    !isProUnlocked -> "Pro"
-                    isVpnRunning -> "Stop"
+                    !isProUnlocked -> "Unlock"
+                    isVpnRunning -> "Active"
                     else -> "Start"
                 },
                 onClick = {
@@ -994,12 +999,12 @@ fun ShieldDashboardTab(
             EnginePermissionCard(
                 icon = Icons.Default.LockPerson,
                 title = "Anti-Tamper Uninstall Lock",
-                subtitle = "Prevents malware or intruders from silently removing ZeroInstall.",
+                subtitle = "Prevents unauthorized removal of ZeroInstall protection.",
                 isEnabled = isDeviceAdminActive && isProUnlocked,
                 isProFeature = true,
                 isProUnlocked = isProUnlocked,
                 buttonText = when {
-                    !isProUnlocked -> "Pro"
+                    !isProUnlocked -> "Unlock"
                     isDeviceAdminActive -> "Locked"
                     else -> "Enable"
                 },
@@ -1105,7 +1110,6 @@ fun DataExfiltrationMonitorTab(
     isProUnlocked: Boolean,
     onOpenPro: () -> Unit
 ) {
-    // If user is on the Free tier, show a clean, attractive Pro Upgrade gate for Data Guard
     if (!isProUnlocked) {
         Box(
             modifier = Modifier
@@ -1118,7 +1122,7 @@ fun DataExfiltrationMonitorTab(
                 shape = RoundedCornerShape(24.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(1.dp, GoldPro.copy(alpha = 0.4f), RoundedCornerShape(24.dp))
+                    .border(1.dp, CyanPrimary.copy(alpha = 0.45f), RoundedCornerShape(24.dp))
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp),
@@ -1127,32 +1131,36 @@ fun DataExfiltrationMonitorTab(
                     Box(
                         modifier = Modifier
                             .size(64.dp)
-                            .background(Color(0xFF2E1F05), CircleShape),
+                            .background(
+                                Brush.linearGradient(listOf(EmeraldPrimary, CyanPrimary)),
+                                CircleShape
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             Icons.Default.DataUsage,
                             contentDescription = null,
-                            tint = GoldPro,
+                            tint = Color.White,
                             modifier = Modifier.size(32.dp)
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     Surface(
-                        color = GoldPro,
-                        shape = RoundedCornerShape(50)
+                        color = CyanDark,
+                        shape = RoundedCornerShape(50),
+                        modifier = Modifier.border(1.dp, CyanSoft.copy(alpha = 0.4f), RoundedCornerShape(50))
                     ) {
                         Text(
-                            text = "ZEROINSTALL PRO FEATURE",
-                            color = Color.Black,
+                            text = "ZEROINSTALL PRO SHIELD",
+                            color = CyanSoft,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.ExtraBold,
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp)
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                         )
                     }
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = "Deep Background Data & Upload Monitor",
+                        text = "Background Data & Upload Guard",
                         color = TextPrimary,
                         fontWeight = FontWeight.Bold,
                         fontSize = 19.sp,
@@ -1160,7 +1168,7 @@ fun DataExfiltrationMonitorTab(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "See exactly which apps are secretly uploading your personal data, photos, or contacts in the background while your screen is off.",
+                        text = "Inspect which apps are uploading data in the background while your screen is off, and review the personal permissions they access.",
                         color = TextSecondary,
                         fontSize = 13.sp,
                         textAlign = TextAlign.Center,
@@ -1173,7 +1181,7 @@ fun DataExfiltrationMonitorTab(
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Icon(Icons.Default.WorkspacePremium, contentDescription = null, tint = Color.White)
+                        Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color.White)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             "Unlock with ZeroInstall Pro",
@@ -1250,7 +1258,7 @@ fun DataExfiltrationMonitorTab(
                     fontSize = 18.sp
                 )
                 Text(
-                    text = "Monitor background data uploads and sensitive permissions per app",
+                    text = "Monitor app uploads and active data access",
                     color = TextSecondary,
                     fontSize = 12.sp
                 )
@@ -1307,12 +1315,12 @@ fun DataExfiltrationMonitorTab(
             FilterChip(
                 selected = filterMode == 1,
                 onClick = { filterMode = 1 },
-                label = { Text("High Upload Ratio", fontSize = 11.sp) }
+                label = { Text("High Upload", fontSize = 11.sp) }
             )
             FilterChip(
                 selected = filterMode == 2,
                 onClick = { filterMode = 2 },
-                label = { Text("Sensitive Access", fontSize = 11.sp) }
+                label = { Text("With Permissions", fontSize = 11.sp) }
             )
         }
 
@@ -1338,11 +1346,7 @@ fun DataExfiltrationMonitorTab(
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .border(
-                                width = 1.dp,
-                                color = if (item.isSuspiciousExfiltration) DangerSoft.copy(alpha = 0.5f) else BorderSubtle,
-                                shape = RoundedCornerShape(16.dp)
-                            )
+                            .border(1.dp, BorderSubtle, RoundedCornerShape(16.dp))
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Row(
@@ -1363,19 +1367,17 @@ fun DataExfiltrationMonitorTab(
                                         fontSize = 11.sp
                                     )
                                 }
-                                if (item.isSuspiciousExfiltration) {
-                                    Surface(
-                                        color = Color(0xFF3B1D1D),
-                                        shape = RoundedCornerShape(50)
-                                    ) {
-                                        Text(
-                                            text = "High Upload",
-                                            color = DangerSoft,
-                                            fontSize = 10.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                                        )
-                                    }
+                                Surface(
+                                    color = if (item.isSuspiciousExfiltration) CyanDark else EmeraldDark,
+                                    shape = RoundedCornerShape(50)
+                                ) {
+                                    Text(
+                                        text = if (item.isSuspiciousExfiltration) "Review Data" else "Normal",
+                                        color = if (item.isSuspiciousExfiltration) CyanSoft else EmeraldSoft,
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                                    )
                                 }
                             }
 
@@ -1407,10 +1409,10 @@ fun DataExfiltrationMonitorTab(
                                     )
                                 }
                                 Column(horizontalAlignment = Alignment.End) {
-                                    Text("UPLOAD SHARE", color = TextSecondary, fontSize = 10.sp)
+                                    Text("UPLOAD RATIO", color = TextSecondary, fontSize = 10.sp)
                                     Text(
                                         text = "${item.uploadRatioPercent}%",
-                                        color = if (item.uploadRatioPercent >= 40) GoldPro else EmeraldSoft,
+                                        color = if (item.uploadRatioPercent >= 40) CyanSoft else EmeraldSoft,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 14.sp
                                     )
@@ -1420,43 +1422,25 @@ fun DataExfiltrationMonitorTab(
                             if (item.sensitiveDataAccessed.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    text = "Permissions: ${item.sensitiveDataAccessed.joinToString(" • ")}",
-                                    color = TextSecondary,
+                                    text = "Active Access: ${item.sensitiveDataAccessed.joinToString(" • ")}",
+                                    color = CyanSoft,
                                     fontSize = 11.sp
                                 )
                             }
 
                             Spacer(modifier = Modifier.height(10.dp))
 
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                OutlinedButton(
-                                    onClick = {
-                                        val infoIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                            data = Uri.parse("package:${item.packageName}")
-                                        }
-                                        context.startActivity(infoIntent)
-                                    },
-                                    shape = RoundedCornerShape(10.dp),
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Text("App Settings", fontSize = 12.sp, color = TextPrimary)
-                                }
-
-                                if (!item.isSystemApp) {
-                                    Button(
-                                        onClick = {
-                                            val uninstallIntent = Intent(Intent.ACTION_DELETE).apply {
-                                                data = Uri.parse("package:${item.packageName}")
-                                            }
-                                            context.startActivity(uninstallIntent)
-                                        },
-                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3B1D1D)),
-                                        shape = RoundedCornerShape(10.dp),
-                                        modifier = Modifier.weight(1f)
-                                    ) {
-                                        Text("Uninstall", fontSize = 12.sp, color = DangerSoft)
+                            OutlinedButton(
+                                onClick = {
+                                    val infoIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                        data = Uri.parse("package:${item.packageName}")
                                     }
-                                }
+                                    context.startActivity(infoIntent)
+                                },
+                                shape = RoundedCornerShape(10.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Review App Permissions & Data", fontSize = 12.sp, color = TextPrimary)
                             }
                         }
                     }
@@ -1466,6 +1450,12 @@ fun DataExfiltrationMonitorTab(
     }
 }
 
+/**
+ * Positive, transparent App & Permission Inspector:
+ * Shows apps with granted permissions (e.g., ChatGPT -> Camera, Microphone, Location) with a
+ * "Review Permissions" action, apps with 0 permissions ("No Permissions Used"), and sideloaded apps.
+ */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun GhostAndSpywareAuditTab(context: Context) {
     val scope = rememberCoroutineScope()
@@ -1488,10 +1478,15 @@ fun GhostAndSpywareAuditTab(context: Context) {
         triggerScan()
     }
 
+    val appsWithPermissions = remember(allApps) { allApps.filter { it.dangerousPermissions.isNotEmpty() } }
+    val appsWithZeroPermissions = remember(allApps) { allApps.filter { it.dangerousPermissions.isEmpty() && !it.isSideloaded } }
+    val sideloadedOrHiddenApps = remember(allApps) { allApps.filter { it.isSideloaded || !it.hasLauncherIcon } }
+
     val filteredApps = remember(allApps, filterMode) {
         when (filterMode) {
-            0 -> allApps.filter { it.riskScore >= 25 || !it.hasLauncherIcon || it.isSideloaded }
-            1 -> allApps.filter { !it.hasLauncherIcon }
+            0 -> appsWithPermissions
+            1 -> appsWithZeroPermissions
+            2 -> sideloadedOrHiddenApps
             else -> allApps
         }
     }
@@ -1508,13 +1503,13 @@ fun GhostAndSpywareAuditTab(context: Context) {
         ) {
             Column {
                 Text(
-                    text = "App Security Audit",
+                    text = "App & Permission Review",
                     color = TextPrimary,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )
                 Text(
-                    text = "Scan for hidden iconless apps & sideloaded installers",
+                    text = "Review active permissions (Camera, Mic, Location) & install sources",
                     color = TextSecondary,
                     fontSize = 12.sp
                 )
@@ -1526,20 +1521,30 @@ fun GhostAndSpywareAuditTab(context: Context) {
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             FilterChip(
                 selected = filterMode == 0,
                 onClick = { filterMode = 0 },
-                label = { Text("Needs Review", fontSize = 11.sp) }
+                label = { Text("Active Permissions (${appsWithPermissions.size})", fontSize = 11.sp) }
             )
             FilterChip(
                 selected = filterMode == 1,
                 onClick = { filterMode = 1 },
-                label = { Text("Hidden Icon", fontSize = 11.sp) }
+                label = { Text("No Permissions (${appsWithZeroPermissions.size})", fontSize = 11.sp) }
             )
             FilterChip(
                 selected = filterMode == 2,
                 onClick = { filterMode = 2 },
+                label = { Text("Sideloaded (${sideloadedOrHiddenApps.size})", fontSize = 11.sp) }
+            )
+            FilterChip(
+                selected = filterMode == 3,
+                onClick = { filterMode = 3 },
                 label = { Text("All Apps (${allApps.size})", fontSize = 11.sp) }
             )
         }
@@ -1552,7 +1557,7 @@ fun GhostAndSpywareAuditTab(context: Context) {
                     CircularProgressIndicator(color = EmeraldSoft)
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        "Checking installed apps...",
+                        "Inspecting app permissions & install sources...",
                         color = TextSecondary,
                         fontSize = 13.sp
                     )
@@ -1569,20 +1574,23 @@ fun GhostAndSpywareAuditTab(context: Context) {
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        "No hidden or high-risk apps found",
+                        "All clear in this view",
                         color = TextPrimary,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 15.sp
                     )
                     Text(
-                        "All scanned applications have normal launcher icons.",
+                        "No apps match this filter right now.",
                         color = TextSecondary,
                         fontSize = 12.sp
                     )
                 }
             }
         } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(bottom = 24.dp)
+            ) {
                 items(filteredApps, key = { it.packageName }) { item ->
                     Card(
                         colors = CardDefaults.cardColors(containerColor = SurfaceCard),
@@ -1605,28 +1613,28 @@ fun GhostAndSpywareAuditTab(context: Context) {
                                         fontSize = 15.sp
                                     )
                                     Text(
-                                        text = item.packageName,
-                                        color = TextSecondary,
+                                        text = if (item.isSideloaded) "Installed outside Play Store" else "Verified Store App",
+                                        color = if (item.isSideloaded) CyanSoft else TextSecondary,
                                         fontSize = 11.sp
                                     )
                                 }
                                 Surface(
                                     color = when {
-                                        item.riskScore >= 60 -> Color(0xFF3B1D1D)
-                                        item.riskScore >= 30 -> Color(0xFF2E1F05)
+                                        item.isSideloaded && !item.hasLauncherIcon -> DangerBg
+                                        item.dangerousPermissions.isNotEmpty() -> CyanDark
                                         else -> EmeraldDark
                                     },
                                     shape = RoundedCornerShape(50)
                                 ) {
                                     Text(
                                         text = when {
-                                            item.riskScore >= 60 -> "High Risk"
-                                            item.riskScore >= 30 -> "Review"
-                                            else -> "Verified"
+                                            item.isSideloaded && !item.hasLauncherIcon -> "Hidden App"
+                                            item.dangerousPermissions.isNotEmpty() -> "Review (${item.dangerousPermissions.size})"
+                                            else -> "No Permissions"
                                         },
                                         color = when {
-                                            item.riskScore >= 60 -> DangerSoft
-                                            item.riskScore >= 30 -> GoldPro
+                                            item.isSideloaded && !item.hasLauncherIcon -> DangerSoft
+                                            item.dangerousPermissions.isNotEmpty() -> CyanSoft
                                             else -> EmeraldSoft
                                         },
                                         fontSize = 11.sp,
@@ -1636,14 +1644,54 @@ fun GhostAndSpywareAuditTab(context: Context) {
                                 }
                             }
 
-                            if (item.riskReasons.isNotEmpty()) {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                item.riskReasons.forEach { reason ->
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            if (item.dangerousPermissions.isEmpty()) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        Icons.Default.CheckCircle,
+                                        contentDescription = null,
+                                        tint = EmeraldSoft,
+                                        modifier = Modifier.size(15.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = "• $reason",
-                                        color = TextSecondary,
+                                        text = "No sensitive permissions granted (Camera, Mic, Location, SMS are off)",
+                                        color = EmeraldSoft,
                                         fontSize = 12.sp
                                     )
+                                }
+                            } else {
+                                Text(
+                                    text = "Permissions Granted:",
+                                    color = TextSecondary,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                FlowRow(
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    item.dangerousPermissions.forEach { perm ->
+                                        Surface(
+                                            color = SurfaceElevated,
+                                            shape = RoundedCornerShape(8.dp),
+                                            modifier = Modifier.border(
+                                                1.dp,
+                                                CyanPrimary.copy(alpha = 0.35f),
+                                                RoundedCornerShape(8.dp)
+                                            )
+                                        ) {
+                                            Text(
+                                                text = perm,
+                                                color = CyanSoft,
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.SemiBold,
+                                                modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
+                                            )
+                                        }
+                                    }
                                 }
                             }
 
@@ -1660,21 +1708,26 @@ fun GhostAndSpywareAuditTab(context: Context) {
                                     shape = RoundedCornerShape(10.dp),
                                     modifier = Modifier.weight(1f)
                                 ) {
-                                    Text("App Info", fontSize = 12.sp, color = TextPrimary)
+                                    Text(
+                                        text = if (item.dangerousPermissions.isNotEmpty()) "Review Permissions" else "App Settings",
+                                        fontSize = 12.sp,
+                                        color = TextPrimary
+                                    )
                                 }
 
-                                Button(
-                                    onClick = {
-                                        val uninstallIntent = Intent(Intent.ACTION_DELETE).apply {
-                                            data = Uri.parse("package:${item.packageName}")
-                                        }
-                                        context.startActivity(uninstallIntent)
-                                    },
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3B1D1D)),
-                                    shape = RoundedCornerShape(10.dp),
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Text("Uninstall", fontSize = 12.sp, color = DangerSoft)
+                                if (item.isSideloaded) {
+                                    Button(
+                                        onClick = {
+                                            val uninstallIntent = Intent(Intent.ACTION_DELETE).apply {
+                                                data = Uri.parse("package:${item.packageName}")
+                                            }
+                                            context.startActivity(uninstallIntent)
+                                        },
+                                        colors = ButtonDefaults.buttonColors(containerColor = SurfaceElevated),
+                                        shape = RoundedCornerShape(10.dp)
+                                    ) {
+                                        Text("Uninstall", fontSize = 12.sp, color = DangerSoft)
+                                    }
                                 }
                             }
                         }
@@ -1787,7 +1840,7 @@ fun LinkScannerTab(context: Context) {
             ) {
                 Text(
                     text = sample,
-                    color = SkyAccent,
+                    color = CyanSoft,
                     fontSize = 12.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -1801,7 +1854,7 @@ fun LinkScannerTab(context: Context) {
         scanResult?.let { res ->
             Card(
                 colors = CardDefaults.cardColors(
-                    containerColor = if (res.isThreat) Color(0xFF2A1417) else Color(0xFF0A2E24)
+                    containerColor = if (res.isThreat) DangerBg else EmeraldDark.copy(alpha = 0.55f)
                 ),
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
@@ -1884,13 +1937,13 @@ fun ThreatHistoryTab(context: Context, events: List<ThreatEvent>) {
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        "No recent threats detected",
+                        "Everything looks safe",
                         color = TextPrimary,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 16.sp
                     )
                     Text(
-                        "Your device is clean. Any blocked APK installs or risky links will appear here.",
+                        "Your phone is protected. Any blocked APK installs or risky links will appear here.",
                         color = TextSecondary,
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center,
@@ -1955,9 +2008,9 @@ private fun MetricTile(
     valueColor: Color
 ) {
     Surface(
-        color = BgDeepSlate.copy(alpha = 0.55f),
+        color = BgDeepSlate.copy(alpha = 0.5f),
         shape = RoundedCornerShape(14.dp),
-        modifier = modifier.border(1.dp, Color.White.copy(alpha = 0.07f), RoundedCornerShape(14.dp))
+        modifier = modifier.border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(14.dp))
     ) {
         Column(
             modifier = Modifier.padding(vertical = 10.dp, horizontal = 8.dp),
@@ -2005,7 +2058,7 @@ private fun EnginePermissionCard(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = if (isEnabled) EmeraldSoft else SkyAccent,
+                    tint = if (isEnabled) EmeraldSoft else CyanSoft,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -2021,13 +2074,13 @@ private fun EnginePermissionCard(
                     if (isProFeature && !isProUnlocked) {
                         Spacer(modifier = Modifier.width(6.dp))
                         Surface(
-                            color = GoldPro.copy(alpha = 0.2f),
+                            color = CyanDark,
                             shape = RoundedCornerShape(50),
-                            modifier = Modifier.border(1.dp, GoldPro.copy(alpha = 0.6f), RoundedCornerShape(50))
+                            modifier = Modifier.border(1.dp, CyanPrimary.copy(alpha = 0.5f), RoundedCornerShape(50))
                         ) {
                             Text(
                                 text = "PRO",
-                                color = GoldSoft,
+                                color = CyanSoft,
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
@@ -2051,9 +2104,9 @@ private fun EnginePermissionCard(
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = when {
-                        isProFeature && !isProUnlocked -> Color(0xFF2E1F05)
+                        isProFeature && !isProUnlocked -> CyanDark
                         isEnabled -> EmeraldDark
-                        else -> SurfaceElevated
+                        else -> EmeraldPrimary
                     }
                 ),
                 shape = RoundedCornerShape(10.dp),
@@ -2062,9 +2115,9 @@ private fun EnginePermissionCard(
                 Text(
                     text = buttonText,
                     color = when {
-                        isProFeature && !isProUnlocked -> GoldSoft
+                        isProFeature && !isProUnlocked -> CyanSoft
                         isEnabled -> EmeraldSoft
-                        else -> TextPrimary
+                        else -> Color.White
                     },
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold

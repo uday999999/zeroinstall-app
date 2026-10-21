@@ -4,27 +4,24 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.content.pm.PermissionInfo
 import android.os.Build
 import com.security.apkshield.model.AppSecurityAuditItem
 
 object StealthAndSpywareScanner {
 
-    /**
-     * Trusted official app stores and OEM system installers.
-     */
     val TRUSTED_INSTALLERS = setOf(
         "com.android.vending",                  // Google Play Store
         "com.google.android.feedback",
         "com.sec.android.app.samsungapps",      // Samsung Galaxy Store
-        "com.samsung.android.scloud",           // Samsung Cloud / Smart Switch restore
+        "com.samsung.android.scloud",           // Samsung Cloud / Smart Switch
         "com.sec.android.easyMover",            // Samsung Smart Switch
-        "com.sec.android.preloadinstaller",     // Samsung Official Preload Installer
+        "com.sec.android.preloadinstaller",     // Samsung Preload Installer
         "com.aurora.store"
     )
 
     /**
-     * Official OS, Google, and Samsung OEM modular service prefixes that legitimately run
-     * without a launcher icon (e.g., Bixby Dictation, Google Verifier, Samsung TTS, Good Lock modules).
+     * Official OS, Google, Samsung, and preloaded OEM service prefixes.
      */
     val VERIFIED_OEM_PREFIXES = listOf(
         "com.samsung.",
@@ -37,22 +34,28 @@ object StealthAndSpywareScanner {
         "android.",
         "androidx.",
         "com.qualcomm.",
-        "com.qti."
+        "com.qti.",
+        "com.microsoft.appmanager"
     )
 
-    private val HIGH_RISK_PERMISSIONS = mapOf(
-        "android.permission.BIND_ACCESSIBILITY_SERVICE" to "Accessibility Control",
-        "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" to "Notification Access",
-        "android.permission.BIND_DEVICE_ADMIN" to "Device Admin Lock",
-        "android.permission.READ_SMS" to "Read SMS Messages",
-        "android.permission.RECEIVE_SMS" to "Receive SMS",
-        "android.permission.SEND_SMS" to "Send SMS",
-        "android.permission.READ_CALL_LOG" to "Read Call History",
-        "android.permission.RECORD_AUDIO" to "Microphone Access",
-        "android.permission.CAMERA" to "Camera Access",
+    /**
+     * Clear, human-readable runtime permissions that users care about reviewing
+     * (e.g., ChatGPT -> Camera, Microphone, Location).
+     */
+    private val SENSITIVE_RUNTIME_PERMISSIONS = linkedMapOf(
+        "android.permission.CAMERA" to "Camera",
+        "android.permission.RECORD_AUDIO" to "Microphone",
+        "android.permission.ACCESS_FINE_LOCATION" to "Location",
+        "android.permission.ACCESS_COARSE_LOCATION" to "Location",
         "android.permission.ACCESS_BACKGROUND_LOCATION" to "Background Location",
-        "android.permission.SYSTEM_ALERT_WINDOW" to "Screen Overlay",
-        "android.permission.REQUEST_INSTALL_PACKAGES" to "Install Unknown APKs"
+        "android.permission.READ_CONTACTS" to "Contacts",
+        "android.permission.READ_SMS" to "SMS",
+        "android.permission.RECEIVE_SMS" to "SMS",
+        "android.permission.SEND_SMS" to "Send SMS",
+        "android.permission.READ_CALL_LOG" to "Call Logs",
+        "android.permission.READ_MEDIA_IMAGES" to "Photos & Media",
+        "android.permission.READ_MEDIA_VIDEO" to "Photos & Media",
+        "android.permission.READ_EXTERNAL_STORAGE" to "Files & Media"
     )
 
     private val KNOWN_STALKERWARE_AND_TRACKER_PACKAGES = listOf(
@@ -91,8 +94,6 @@ object StealthAndSpywareScanner {
                 pkgName.contains(it, ignoreCase = true)
             }
 
-            // Skip official Samsung, Google, and Android OS system services so legitimate modules
-            // like Bixby Dictation or Google Developer Verifier are never falsely flagged.
             if (isVerifiedOemOrSystemPackage(pkgName, appInfo) && !isKnownSpyware) {
                 continue
             }
@@ -108,35 +109,19 @@ object StealthAndSpywareScanner {
             val hasLauncher = pm.getLaunchIntentForPackage(pkgName) != null
             val isSideloaded = !isFromTrustedStore
 
+            // Collect ONLY runtime permissions that the user has ACTUALLY granted to this app
             val requestedPerms = pkgInfo.requestedPermissions?.toList() ?: emptyList()
             val reqFlags = pkgInfo.requestedPermissionsFlags
-            val grantedDangerousPerms = mutableListOf<String>()
+            val grantedPerms = mutableListOf<String>()
 
             if (reqFlags != null) {
                 for (i in requestedPerms.indices) {
                     val perm = requestedPerms[i]
                     val isGranted = (reqFlags[i] and PackageInfo.REQUESTED_PERMISSION_GRANTED) != 0
                     if (isGranted) {
-                        HIGH_RISK_PERMISSIONS[perm]?.let { friendly ->
-                            if (friendly !in grantedDangerousPerms) grantedDangerousPerms.add(friendly)
+                        SENSITIVE_RUNTIME_PERMISSIONS[perm]?.let { friendly ->
+                            if (friendly !in grantedPerms) grantedPerms.add(friendly)
                         }
-                    }
-                }
-            }
-
-            // Check special services (Accessibility / Notification Listener)
-            var hasSpecialMonitoringService = false
-            pkgInfo.services?.forEach { svc ->
-                when (svc.permission) {
-                    "android.permission.BIND_ACCESSIBILITY_SERVICE" -> {
-                        hasSpecialMonitoringService = true
-                        val label = "Accessibility Service"
-                        if (label !in grantedDangerousPerms) grantedDangerousPerms.add(label)
-                    }
-                    "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" -> {
-                        hasSpecialMonitoringService = true
-                        val label = "Notification Listener"
-                        if (label !in grantedDangerousPerms) grantedDangerousPerms.add(label)
                     }
                 }
             }
@@ -144,41 +129,32 @@ object StealthAndSpywareScanner {
             val riskReasons = mutableListOf<String>()
             var riskScore = 0
 
-            // 1. Known commercial spyware/stalkerware signature
             val matchedTrackers = mutableListOf<String>()
             if (isKnownSpyware) {
                 riskScore += 95
                 matchedTrackers.add("Known Spyware Signature ($pkgName)")
-                riskReasons.add("Matches known stalkerware / monitoring package signature")
+                riskReasons.add("Matches known stalkerware package signature")
             }
 
-            // 2. Hidden / Iconless App check:
-            // Only flag an iconless app if it was sideloaded outside official stores OR has active monitoring services
-            if (!hasLauncher && (isSideloaded || hasSpecialMonitoringService)) {
-                riskScore += 55
-                riskReasons.add("Hidden background app: Has no home screen icon")
+            if (!hasLauncher && isSideloaded) {
+                riskScore += 60
+                riskReasons.add("Hidden app: Installed outside Play Store with no home screen icon")
             }
 
-            // 3. Blank or zero-width stealth app name
             val cleanedLabel = rawLabel.replace(Regex("[\\s\\u200B\\u200C\\u200D\\uFEFF\\u3164]"), "")
             if (cleanedLabel.isEmpty() || rawLabel == pkgName) {
                 riskScore += 35
                 riskReasons.add("Uses a blank or hidden application name")
             }
 
-            // 4. Sideloaded APK outside Google Play / Samsung Galaxy Store
             if (isSideloaded) {
-                riskScore += 25
-                riskReasons.add("Installed outside Google Play Store / Galaxy Store")
+                riskScore += 30
+                riskReasons.add("Sideloaded outside Google Play / Galaxy Store")
             }
 
-            // 5. High-risk permission combination on a sideloaded or non-store app
-            if (isSideloaded && grantedDangerousPerms.size >= 3) {
-                riskScore += 25
-                riskReasons.add("Sideloaded app with ${grantedDangerousPerms.size} sensitive permissions (${grantedDangerousPerms.take(3).joinToString(", ")})")
-            } else if (hasSpecialMonitoringService && isSideloaded) {
-                riskScore += 25
-                riskReasons.add("Sideloaded app with background screen/notification monitoring")
+            // Give a mild review score based on how many sensitive permissions are currently active
+            if (grantedPerms.isNotEmpty()) {
+                riskScore += (grantedPerms.size * 8).coerceAtMost(40)
             }
 
             val clampedScore = riskScore.coerceAtMost(100)
@@ -190,7 +166,7 @@ object StealthAndSpywareScanner {
                     isSystemApp = false,
                     hasLauncherIcon = hasLauncher,
                     isSideloaded = isSideloaded,
-                    dangerousPermissions = grantedDangerousPerms,
+                    dangerousPermissions = grantedPerms,
                     detectedTrackers = matchedTrackers,
                     riskScore = clampedScore,
                     riskReasons = riskReasons,
@@ -199,7 +175,11 @@ object StealthAndSpywareScanner {
             )
         }
 
-        return results.sortedByDescending { it.riskScore }
+        return results.sortedWith(
+            compareByDescending<AppSecurityAuditItem> { it.isSideloaded && !it.hasLauncherIcon }
+                .thenByDescending { it.dangerousPermissions.size }
+                .thenBy { it.appName.lowercase() }
+        )
     }
 
     fun auditSinglePackage(context: Context, packageName: String): AppSecurityAuditItem? {
@@ -207,6 +187,8 @@ object StealthAndSpywareScanner {
     }
 
     private fun isInstalledFromTrustedStore(pm: PackageManager, packageName: String): Boolean {
+        // Pre-installed Microsoft apps on Samsung devices (Excel, Office, OneDrive, Outlook)
+        if (packageName.startsWith("com.microsoft.")) return true
         return try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 val info = pm.getInstallSourceInfo(packageName)
