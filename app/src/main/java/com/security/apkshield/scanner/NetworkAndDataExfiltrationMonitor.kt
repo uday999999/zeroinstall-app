@@ -148,7 +148,7 @@ object NetworkAndDataExfiltrationMonitor {
             if (pkgName == context.packageName) continue
 
             val uid = appInfo.uid
-            val isSystem = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0
+            val isSystem = StealthAndSpywareScanner.isVerifiedOemOrSystemPackage(pkgName, appInfo)
 
             // Combine NetworkStatsManager data with TrafficStats fallback
             val trafficRx = TrafficStats.getUidRxBytes(uid).coerceAtLeast(0L)
