@@ -172,29 +172,19 @@ class MainActivity : ComponentActivity() {
 
             CompositionLocalProvider(LocalShieldPalette provides palette) {
                 MaterialTheme(
-                    colorScheme = if (isProUnlocked) {
-                        lightColorScheme(
-                            primary = palette.emeraldPrimary,
-                            secondary = palette.cyanPrimary,
-                            background = palette.bgDeepSlate,
-                            surface = palette.surfaceCard,
-                            onPrimary = Color.White,
-                            onSecondary = Color.White,
-                            onBackground = palette.textPrimary,
-                            onSurface = palette.textPrimary
-                        )
-                    } else {
-                        darkColorScheme(
-                            primary = palette.emeraldPrimary,
-                            secondary = palette.cyanPrimary,
-                            background = palette.bgDeepSlate,
-                            surface = palette.surfaceCard,
-                            onPrimary = Color.White,
-                            onSecondary = Color.White,
-                            onBackground = palette.textPrimary,
-                            onSurface = palette.textPrimary
-                        )
-                    }
+                    colorScheme = darkColorScheme(
+                        primary = ChessGoldTrim,
+                        secondary = ChessIvoryCream,
+                        background = ChessMidnightOnyx,
+                        surface = ChessCardBg,
+                        surfaceVariant = ChessCardElevated,
+                        onPrimary = ChessForestGreen,
+                        onSecondary = ChessForestGreen,
+                        onBackground = palette.textPrimary,
+                        onSurface = palette.textPrimary,
+                        onSurfaceVariant = Color(0xFF8FA093),
+                        outline = ChessCardBorder
+                    )
                 ) {
                     ApkShieldMainApp()
                 }
@@ -345,8 +335,13 @@ fun ApkShieldMainApp() {
             }
         },
         bottomBar = {
-            val activeNavTint = ChessGoldTrim
-            val activeNavIndicator = ChessForestGreen
+            val navItemColors = NavigationBarItemDefaults.colors(
+                selectedIconColor = ChessIvoryCream,
+                selectedTextColor = ChessGoldTrim,
+                indicatorColor = ChessForestGreen,
+                unselectedIconColor = Color(0xFF8FA093),
+                unselectedTextColor = Color(0xFF8FA093)
+            )
             NavigationBar(
                 containerColor = ChessMidnightOnyx,
                 tonalElevation = 0.dp
@@ -356,26 +351,14 @@ fun ApkShieldMainApp() {
                     onClick = { selectedTab = 0 },
                     icon = { Icon(Icons.Default.Shield, contentDescription = null) },
                     label = { Text("Protection", fontSize = 11.sp) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = activeNavTint,
-                        selectedTextColor = activeNavTint,
-                        indicatorColor = activeNavIndicator,
-                        unselectedIconColor = TextSecondary,
-                        unselectedTextColor = TextSecondary
-                    )
+                    colors = navItemColors
                 )
                 NavigationBarItem(
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 },
                     icon = { Icon(Icons.Default.FactCheck, contentDescription = null) },
                     label = { Text("App Audit", fontSize = 11.sp) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = activeNavTint,
-                        selectedTextColor = activeNavTint,
-                        indicatorColor = activeNavIndicator,
-                        unselectedIconColor = TextSecondary,
-                        unselectedTextColor = TextSecondary
-                    )
+                    colors = navItemColors
                 )
                 NavigationBarItem(
                     selected = selectedTab == 2,
@@ -394,26 +377,14 @@ fun ApkShieldMainApp() {
                         }
                     },
                     label = { Text("Data Guard", fontSize = 11.sp) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = activeNavTint,
-                        selectedTextColor = activeNavTint,
-                        indicatorColor = activeNavIndicator,
-                        unselectedIconColor = TextSecondary,
-                        unselectedTextColor = TextSecondary
-                    )
+                    colors = navItemColors
                 )
                 NavigationBarItem(
                     selected = selectedTab == 3,
                     onClick = { selectedTab = 3 },
                     icon = { Icon(Icons.Default.Link, contentDescription = null) },
                     label = { Text("Link Check", fontSize = 11.sp) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = activeNavTint,
-                        selectedTextColor = activeNavTint,
-                        indicatorColor = activeNavIndicator,
-                        unselectedIconColor = TextSecondary,
-                        unselectedTextColor = TextSecondary
-                    )
+                    colors = navItemColors
                 )
                 NavigationBarItem(
                     selected = selectedTab == 4,
@@ -422,8 +393,8 @@ fun ApkShieldMainApp() {
                         BadgedBox(
                             badge = {
                                 if (threatEvents.isNotEmpty()) {
-                                    Badge(containerColor = Color(0xFF10B981)) {
-                                        Text("${threatEvents.size}", color = Color.White)
+                                    Badge(containerColor = ChessGoldTrim) {
+                                        Text("${threatEvents.size}", color = ChessForestGreen, fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
@@ -432,13 +403,7 @@ fun ApkShieldMainApp() {
                         }
                     },
                     label = { Text("Activity", fontSize = 11.sp) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = activeNavTint,
-                        selectedTextColor = activeNavTint,
-                        indicatorColor = activeNavIndicator,
-                        unselectedIconColor = TextSecondary,
-                        unselectedTextColor = TextSecondary
-                    )
+                    colors = navItemColors
                 )
             }
         },
@@ -622,10 +587,11 @@ fun ZeroInstallProDialog(
                             onWatchAdRewardDay()
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF10B981)),
-                    shape = RoundedCornerShape(10.dp)
+                    colors = ButtonDefaults.buttonColors(containerColor = ChessIvoryCream),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier.border(1.dp, ChessGoldTrim, RoundedCornerShape(10.dp))
                 ) {
-                    Text("Watch Ad & Extend +1 Day", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text("Watch Ad & Extend +1 Day", color = ChessForestGreen, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
@@ -688,7 +654,7 @@ fun ZeroInstallProDialog(
                 )
                 Text(
                     text = "24/7 Automated Device & Link Defense",
-                    color = Color(0xFF10B981),
+                    color = ChessGoldTrim,
                     fontSize = 11.5.sp,
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Center
@@ -777,12 +743,13 @@ fun ZeroInstallProDialog(
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Surface(
-                                    color = Color(0xFF10B981),
-                                    shape = RoundedCornerShape(50)
+                                    color = ChessForestGreen,
+                                    shape = RoundedCornerShape(50),
+                                    modifier = Modifier.border(1.dp, ChessGoldTrim, RoundedCornerShape(50))
                                 ) {
                                     Text(
                                         "BEST VALUE",
-                                        color = Color.White,
+                                        color = ChessGoldTrim,
                                         fontSize = 9.sp,
                                         fontWeight = FontWeight.ExtraBold,
                                         modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp)
@@ -799,7 +766,7 @@ fun ZeroInstallProDialog(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = price.yearlyPriceFormatted,
-                            color = Color(0xFF10B981),
+                            color = ChessGoldTrim,
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.5.sp,
                             maxLines = 1,
@@ -812,10 +779,11 @@ fun ZeroInstallProDialog(
 
                 // 3. Free Option ("Free Forever" / "Watch 1 Ad Extend 1 Day" / "Active: 2 Days 23 Hours 58 Mins")
                 Surface(
-                    color = Color(0xFF10B981),
+                    color = ChessIvoryCream,
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier
                         .fillMaxWidth()
+                        .border(1.dp, ChessGoldTrim, RoundedCornerShape(14.dp))
                         .clickable {
                             if (!isPlayingRewardedAd) {
                                 showAdConfirmationDialog = true
@@ -834,14 +802,14 @@ fun ZeroInstallProDialog(
                                 horizontalArrangement = Arrangement.Center
                             ) {
                                 CircularProgressIndicator(
-                                    color = Color.White,
+                                    color = ChessForestGreen,
                                     strokeWidth = 2.dp,
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = "Playing Video Ad... ${adSecondsLeft}s (+1 Day)",
-                                    color = Color.White,
+                                    color = ChessForestGreen,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 13.sp
                                 )
@@ -854,21 +822,21 @@ fun ZeroInstallProDialog(
                                 Icon(
                                     imageVector = Icons.Default.PlayCircleFilled,
                                     contentDescription = null,
-                                    tint = Color.White,
+                                    tint = ChessForestGreen,
                                     modifier = Modifier.size(24.dp)
                                 )
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = "Free Forever",
-                                        color = Color.White,
+                                        color = ChessForestGreen,
                                         fontWeight = FontWeight.Black,
                                         fontSize = 15.sp
                                     )
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
                                         text = "Watch 1 Ad Extend 1 Day",
-                                        color = Color.White.copy(alpha = 0.95f),
+                                        color = ChessForestGreen.copy(alpha = 0.90f),
                                         fontSize = 11.5.sp,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -876,7 +844,7 @@ fun ZeroInstallProDialog(
                                         Spacer(modifier = Modifier.height(2.dp))
                                         Text(
                                             text = "Active: $remainingVerboseFormatted",
-                                            color = Color.White.copy(alpha = 0.90f),
+                                            color = ChessForestGreen.copy(alpha = 0.80f),
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.SemiBold
                                         )
@@ -907,7 +875,7 @@ private fun ProFeatureItem(text: String) {
         Icon(
             imageVector = Icons.Default.CheckCircle,
             contentDescription = null,
-            tint = Color(0xFF10B981),
+            tint = ChessGoldTrim,
             modifier = Modifier
                 .padding(top = 2.dp)
                 .size(16.dp)
@@ -1241,22 +1209,23 @@ fun ShieldDashboardTab(
                                 }
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF10B981)),
+                        colors = ButtonDefaults.buttonColors(containerColor = ChessIvoryCream),
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(44.dp)
+                            .border(1.dp, ChessGoldTrim, RoundedCornerShape(10.dp))
                     ) {
                         Icon(
                             imageVector = if (quickScanComplete) Icons.Default.CheckCircle else Icons.Default.Radar,
                             contentDescription = null,
-                            tint = Color.White,
+                            tint = ChessForestGreen,
                             modifier = Modifier.size(17.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = if (isQuickScanning) "Checking Device Security..." else if (quickScanComplete) "All Checks Passed • Scan Again" else "Run Security Check",
-                            color = Color.White,
+                            color = ChessForestGreen,
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.5.sp
                         )
@@ -1335,12 +1304,17 @@ fun ShieldDashboardTab(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Surface(
-                                    color = if (bankingReport.isAllSafe) EmeraldDark else DangerBg,
-                                    shape = RoundedCornerShape(50)
+                                    color = if (bankingReport.isAllSafe) ChessForestGreen else DangerBg,
+                                    shape = RoundedCornerShape(50),
+                                    modifier = Modifier.border(
+                                        1.dp,
+                                        if (bankingReport.isAllSafe) ChessGoldTrim.copy(alpha = 0.5f) else DangerSoft,
+                                        RoundedCornerShape(50)
+                                    )
                                 ) {
                                     Text(
                                         text = if (bankingReport.isAllSafe) "SAFE TO PAY" else "REVIEW",
-                                        color = if (bankingReport.isAllSafe) EmeraldSoft else DangerSoft,
+                                        color = if (bankingReport.isAllSafe) ChessGoldTrim else DangerSoft,
                                         fontSize = 9.sp,
                                         fontWeight = FontWeight.ExtraBold,
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
@@ -1401,15 +1375,17 @@ fun ShieldDashboardTab(
                                     }
                                 }
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = EmeraldPrimary),
+                            colors = ButtonDefaults.buttonColors(containerColor = ChessIvoryCream),
                             shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.weight(1.3f),
+                            modifier = Modifier
+                                .weight(1.3f)
+                                .border(1.dp, ChessGoldTrim, RoundedCornerShape(12.dp)),
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp)
                         ) {
                             Icon(
                                 imageVector = if (bankingVerifiedJustNow) Icons.Default.Verified else Icons.Default.Shield,
                                 contentDescription = null,
-                                tint = Color.White,
+                                tint = ChessForestGreen,
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
@@ -1419,7 +1395,7 @@ fun ShieldDashboardTab(
                                     bankingVerifiedJustNow -> "Verified Safe"
                                     else -> "Verify Now"
                                 },
-                                color = Color.White,
+                                color = ChessForestGreen,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp
                             )
@@ -1430,13 +1406,15 @@ fun ShieldDashboardTab(
                                 PeopleProtectionTools.scrubClipboard(context)
                                 clipboardClearedJustNow = true
                             },
+                            colors = ButtonDefaults.outlinedButtonColors(containerColor = ChessCardElevated),
+                            border = BorderStroke(1.dp, ChessCardBorder),
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier.weight(1f),
                             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 10.dp)
                         ) {
                             Text(
                                 text = if (clipboardClearedJustNow) "Clipboard Cleared ✓" else "Clear Copied OTPs",
-                                color = if (clipboardClearedJustNow) EmeraldSoft else CyanSoft,
+                                color = if (clipboardClearedJustNow) ChessGoldTrim else ChessIvoryCream,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 11.sp,
                                 maxLines = 1
@@ -1662,28 +1640,28 @@ fun DataExfiltrationMonitorTab(
                         modifier = Modifier
                             .size(60.dp)
                             .background(
-                                Color(0xFF161F30),
+                                ChessIvoryCream,
                                 CircleShape
                             )
-                            .border(1.5.dp, Color(0xFF10B981), CircleShape),
+                            .border(1.5.dp, ChessGoldTrim, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             Icons.Default.DataUsage,
                             contentDescription = null,
-                            tint = Color(0xFF10B981),
+                            tint = ChessForestGreen,
                             modifier = Modifier.size(30.dp)
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     Surface(
-                        color = Color(0xFF162820),
+                        color = ChessForestGreen,
                         shape = RoundedCornerShape(4.dp),
-                        modifier = Modifier.border(1.dp, Color(0xFF10B981).copy(alpha = 0.4f), RoundedCornerShape(4.dp))
+                        modifier = Modifier.border(1.dp, ChessGoldTrim.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
                     ) {
                         Text(
                             text = "24/7 ACTIVE DATA GUARD",
-                            color = Color(0xFF10B981),
+                            color = ChessGoldTrim,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp)
@@ -2210,13 +2188,13 @@ fun GhostAndSpywareAuditTab(context: Context) {
                                             shape = RoundedCornerShape(8.dp),
                                             modifier = Modifier.border(
                                                 1.dp,
-                                                Color(0xFF10B981).copy(alpha = 0.4f),
+                                                ChessGoldTrim.copy(alpha = 0.4f),
                                                 RoundedCornerShape(8.dp)
                                             )
                                         ) {
                                             Text(
                                                 text = perm,
-                                                color = Color(0xFF10B981),
+                                                color = ChessGoldTrim,
                                                 fontSize = 11.sp,
                                                 fontWeight = FontWeight.SemiBold,
                                                 modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
@@ -2236,14 +2214,14 @@ fun GhostAndSpywareAuditTab(context: Context) {
                                         }
                                         context.startActivity(infoIntent)
                                     },
-                                    border = BorderStroke(1.dp, Color(0xFF10B981).copy(alpha = 0.45f)),
+                                    border = BorderStroke(1.dp, ChessGoldTrim.copy(alpha = 0.45f)),
                                     shape = RoundedCornerShape(10.dp),
                                     modifier = Modifier.weight(1f)
                                 ) {
                                     Text(
                                         text = if (item.dangerousPermissions.isNotEmpty()) "Review Permissions" else "App Settings",
                                         fontSize = 12.sp,
-                                        color = Color(0xFF10B981),
+                                        color = ChessGoldTrim,
                                         fontWeight = FontWeight.SemiBold
                                     )
                                 }
@@ -2572,19 +2550,19 @@ private fun ShieldFilterPill(
     onClick: () -> Unit
 ) {
     Surface(
-        color = if (selected) Color(0xFF162820) else SurfaceElevated,
+        color = if (selected) ChessForestGreen else SurfaceElevated,
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier
             .border(
                 width = 1.dp,
-                color = if (selected) Color(0xFF10B981) else BorderSubtle,
+                color = if (selected) ChessGoldTrim else BorderSubtle,
                 shape = RoundedCornerShape(20.dp)
             )
             .clickable { onClick() }
     ) {
         Text(
             text = label,
-            color = if (selected) Color(0xFF10B981) else TextSecondary,
+            color = if (selected) ChessGoldTrim else TextSecondary,
             fontSize = 11.5.sp,
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
@@ -2757,7 +2735,7 @@ private fun BankingCheckRow(
         Icon(
             imageVector = if (isSafe) Icons.Default.CheckCircle else Icons.Default.Warning,
             contentDescription = null,
-            tint = if (isSafe) EmeraldSoft else DangerSoft,
+            tint = if (isSafe) ChessGoldTrim else DangerSoft,
             modifier = Modifier.size(15.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
