@@ -17,10 +17,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import com.security.apkshield.R
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -92,46 +96,46 @@ data class ShieldPalette(
     val isLight: Boolean
 )
 
-// White Canvas, Jet Black Typography & Dark Claude Terracotta Theme (Editorial Light Mode)
-private val ClaudeCanvasBg = Color(0xFFF8F9FA)         // Crisp Light Canvas
-private val ClaudeCardWhite = Color(0xFFFFFFFF)        // Pure White Surface Card
-private val ClaudeElevatedSurface = Color(0xFFF1F3F5)  // Light Elevated Surface
-private val ClaudeBorder = Color(0xFFE2E8F0)           // Hairline Border
-private val ClaudeDarkTerracotta = Color(0xFF9E4024)   // Deep Claude Terracotta Primary Accent
-private val ClaudePeachBadgeBg = Color(0xFFFAF0EB)     // Subtle Warm Peach Badge Fill
-private val ClaudePeachBadgeBorder = Color(0xFFF0C4B4) // Warm Peach Badge Border
-private val ClaudeTextPrimary = Color(0xFF0F172A)      // Deep Jet Obsidian Black
-private val ClaudeTextSecondary = Color(0xFF64748B)    // Neutral Slate Gray
-private val ClaudeDangerRed = Color(0xFFDC2626)        // Clean Alert Red
-private val ClaudeDangerBg = Color(0xFFFEF2F2)         // Light Alert Red Fill
+// White Canvas, Jet Black Typography & Alpine Forest Green Theme (Light Mode)
+private val ForestCanvasBg = Color(0xFFF8FAF9)         // Crisp Light Canvas
+private val ForestCardWhite = Color(0xFFFFFFFF)        // Pure White Surface Card
+private val ForestElevatedSurface = Color(0xFFF0F4F2)  // Soft Mint Elevated Surface
+private val ForestBorder = Color(0xFFE2EAE5)           // Hairline Border
+private val ForestGreenPrimary = Color(0xFF1B4D3E)     // Alpine Forest Green Primary Accent
+private val ForestMintBadgeBg = Color(0xFFEBF5F0)      // Soft Mint Badge Fill
+private val ForestMintBadgeBorder = Color(0xFFBCE1CE)  // Mint Badge Border
+private val ForestTextPrimary = Color(0xFF0F172A)      // Deep Jet Obsidian Black
+private val ForestTextSecondary = Color(0xFF52645B)    // Calm Sage Slate Gray
+private val ForestDangerRed = Color(0xFFDC2626)        // Clean Alert Red
+private val ForestDangerBg = Color(0xFFFEF2F2)         // Light Alert Red Fill
 
-private val WhiteClaudePalette = ShieldPalette(
-    bgDeepSlate = ClaudeCanvasBg,
-    surfaceCard = ClaudeCardWhite,
-    surfaceElevated = ClaudeElevatedSurface,
-    borderSubtle = ClaudeBorder,
-    emeraldPrimary = ClaudeDarkTerracotta,
-    emeraldSoft = ClaudeDarkTerracotta,
-    emeraldDark = ClaudePeachBadgeBg,
-    cyanPrimary = ClaudeDarkTerracotta,
-    cyanSoft = ClaudeDarkTerracotta,
-    cyanDark = ClaudeElevatedSurface,
-    textPrimary = ClaudeTextPrimary,
-    textSecondary = ClaudeTextSecondary,
-    dangerSoft = ClaudeDangerRed,
-    dangerBg = ClaudeDangerBg,
-    proGold = ClaudeDarkTerracotta,
-    proGoldSoft = ClaudeDarkTerracotta,
-    proGoldDark = ClaudePeachBadgeBg,
-    proCardBg = ClaudeCardWhite,
-    proBorder = ClaudePeachBadgeBorder,
+private val WhiteForestPalette = ShieldPalette(
+    bgDeepSlate = ForestCanvasBg,
+    surfaceCard = ForestCardWhite,
+    surfaceElevated = ForestElevatedSurface,
+    borderSubtle = ForestBorder,
+    emeraldPrimary = ForestGreenPrimary,
+    emeraldSoft = ForestGreenPrimary,
+    emeraldDark = ForestMintBadgeBg,
+    cyanPrimary = ForestGreenPrimary,
+    cyanSoft = ForestGreenPrimary,
+    cyanDark = ForestElevatedSurface,
+    textPrimary = ForestTextPrimary,
+    textSecondary = ForestTextSecondary,
+    dangerSoft = ForestDangerRed,
+    dangerBg = ForestDangerBg,
+    proGold = ForestGreenPrimary,
+    proGoldSoft = ForestGreenPrimary,
+    proGoldDark = ForestMintBadgeBg,
+    proCardBg = ForestCardWhite,
+    proBorder = ForestMintBadgeBorder,
     isLight = true
 )
 
-private val FreeDarkPalette = WhiteClaudePalette
-private val ProLightPalette = WhiteClaudePalette
+private val FreeDarkPalette = WhiteForestPalette
+private val ProLightPalette = WhiteForestPalette
 
-private val LocalShieldPalette = staticCompositionLocalOf { WhiteClaudePalette }
+private val LocalShieldPalette = staticCompositionLocalOf { WhiteForestPalette }
 
 private val BgDeepSlate: Color @Composable get() = LocalShieldPalette.current.bgDeepSlate
 private val SurfaceCard: Color @Composable get() = LocalShieldPalette.current.surfaceCard
@@ -162,7 +166,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val isProUnlocked by ShieldRepository.isProUnlocked.collectAsState()
-            val palette = WhiteClaudePalette
+            val palette = WhiteForestPalette
 
             val view = LocalView.current
             if (!view.isInEditMode) {
@@ -176,17 +180,17 @@ class MainActivity : ComponentActivity() {
             CompositionLocalProvider(LocalShieldPalette provides palette) {
                 MaterialTheme(
                     colorScheme = lightColorScheme(
-                        primary = ClaudeDarkTerracotta,
-                        secondary = ClaudePeachBadgeBg,
-                        background = ClaudeCanvasBg,
-                        surface = ClaudeCardWhite,
-                        surfaceVariant = ClaudeElevatedSurface,
+                        primary = ForestGreenPrimary,
+                        secondary = ForestMintBadgeBg,
+                        background = ForestCanvasBg,
+                        surface = ForestCardWhite,
+                        surfaceVariant = ForestElevatedSurface,
                         onPrimary = Color.White,
-                        onSecondary = ClaudeDarkTerracotta,
+                        onSecondary = ForestGreenPrimary,
                         onBackground = palette.textPrimary,
                         onSurface = palette.textPrimary,
-                        onSurfaceVariant = ClaudeTextSecondary,
-                        outline = ClaudeBorder
+                        onSurfaceVariant = ForestTextSecondary,
+                        outline = ForestBorder
                     )
                 ) {
                     ApkShieldMainApp()
@@ -275,62 +279,57 @@ fun ApkShieldMainApp() {
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .background(ClaudeDarkTerracotta, RoundedCornerShape(10.dp)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Shield,
-                                    contentDescription = null,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(19.dp)
-                                )
-                            }
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_grok_z_logo),
+                                contentDescription = "ZeroPro Guard Logo",
+                                modifier = Modifier.size(36.dp),
+                                contentScale = ContentScale.Fit
+                            )
                             Spacer(modifier = Modifier.width(10.dp))
                             Column {
                                 Text(
-                                    text = "ZeroPro",
-                                    fontWeight = FontWeight.Bold,
+                                    text = "ZeroPro Guard",
+                                    fontWeight = FontWeight.Black,
                                     fontSize = 17.sp,
-                                    color = TextPrimary
+                                    color = TextPrimary,
+                                    letterSpacing = (-0.3).sp
                                 )
                                 Text(
-                                    text = "by ZeroInstall",
+                                    text = "Smart Protection. Zero Compromise.",
                                     fontSize = 11.sp,
-                                    color = ClaudeDarkTerracotta,
-                                    fontWeight = FontWeight.SemiBold
+                                    color = TextSecondary,
+                                    fontWeight = FontWeight.Medium
                                 )
                             }
                         }
 
-                        // Pro Badge: Shield Logo + PRO in bold letters
-                        Surface(
-                            color = ClaudePeachBadgeBg,
-                            shape = RoundedCornerShape(8.dp),
+                        // Right PRO Pill + Crown
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
-                                .border(1.dp, ClaudePeachBadgeBorder, RoundedCornerShape(8.dp))
                                 .clickable { showProModal = true }
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 11.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                            Surface(
+                                color = ForestMintBadgeBg,
+                                shape = RoundedCornerShape(50),
+                                modifier = Modifier.border(1.dp, ForestMintBadgeBorder, RoundedCornerShape(50))
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Shield,
-                                    contentDescription = null,
-                                    tint = ClaudeDarkTerracotta,
-                                    modifier = Modifier.size(15.dp)
-                                )
-                                Spacer(modifier = Modifier.width(5.dp))
                                 Text(
                                     text = "PRO",
-                                    color = ClaudeDarkTerracotta,
-                                    fontSize = 12.5.sp,
-                                    fontWeight = FontWeight.Black
+                                    color = ForestGreenPrimary,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 0.8.sp,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                                 )
                             }
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Icon(
+                                imageVector = Icons.Default.Shield,
+                                contentDescription = "PRO Active",
+                                tint = ForestGreenPrimary,
+                                modifier = Modifier.size(18.dp)
+                            )
                         }
                     }
                 }
@@ -338,28 +337,28 @@ fun ApkShieldMainApp() {
         },
         bottomBar = {
             val navItemColors = NavigationBarItemDefaults.colors(
-                selectedIconColor = ClaudeDarkTerracotta,
-                selectedTextColor = ClaudeDarkTerracotta,
-                indicatorColor = ClaudePeachBadgeBg,
-                unselectedIconColor = ClaudeTextSecondary,
-                unselectedTextColor = ClaudeTextSecondary
+                selectedIconColor = ForestGreenPrimary,
+                selectedTextColor = ForestGreenPrimary,
+                indicatorColor = ForestMintBadgeBg,
+                unselectedIconColor = ForestTextSecondary,
+                unselectedTextColor = ForestTextSecondary
             )
             NavigationBar(
-                containerColor = ClaudeCardWhite,
+                containerColor = ForestCardWhite,
                 tonalElevation = 2.dp
             ) {
                 NavigationBarItem(
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 },
                     icon = { Icon(Icons.Default.Shield, contentDescription = null) },
-                    label = { Text("Protection", fontSize = 11.sp) },
+                    label = { Text("Protection", fontSize = 11.sp, fontWeight = if (selectedTab == 0) FontWeight.Bold else FontWeight.Normal) },
                     colors = navItemColors
                 )
                 NavigationBarItem(
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 },
                     icon = { Icon(Icons.Default.FactCheck, contentDescription = null) },
-                    label = { Text("App Audit", fontSize = 11.sp) },
+                    label = { Text("App Audit", fontSize = 11.sp, fontWeight = if (selectedTab == 1) FontWeight.Bold else FontWeight.Normal) },
                     colors = navItemColors
                 )
                 NavigationBarItem(
@@ -369,7 +368,7 @@ fun ApkShieldMainApp() {
                         BadgedBox(
                             badge = {
                                 if (!isProUnlocked) {
-                                    Badge(containerColor = ClaudeDarkTerracotta) {
+                                    Badge(containerColor = ForestGreenPrimary) {
                                         Text("PRO", color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.ExtraBold)
                                     }
                                 }
@@ -378,14 +377,14 @@ fun ApkShieldMainApp() {
                             Icon(Icons.Default.DataUsage, contentDescription = null)
                         }
                     },
-                    label = { Text("Data Guard", fontSize = 11.sp) },
+                    label = { Text("Data Guard", fontSize = 11.sp, fontWeight = if (selectedTab == 2) FontWeight.Bold else FontWeight.Normal) },
                     colors = navItemColors
                 )
                 NavigationBarItem(
                     selected = selectedTab == 3,
                     onClick = { selectedTab = 3 },
                     icon = { Icon(Icons.Default.Link, contentDescription = null) },
-                    label = { Text("Link Check", fontSize = 11.sp) },
+                    label = { Text("Link Check", fontSize = 11.sp, fontWeight = if (selectedTab == 3) FontWeight.Bold else FontWeight.Normal) },
                     colors = navItemColors
                 )
                 NavigationBarItem(
@@ -395,7 +394,7 @@ fun ApkShieldMainApp() {
                         BadgedBox(
                             badge = {
                                 if (threatEvents.isNotEmpty()) {
-                                    Badge(containerColor = ClaudeDarkTerracotta) {
+                                    Badge(containerColor = ForestGreenPrimary) {
                                         Text("${threatEvents.size}", color = Color.White, fontWeight = FontWeight.Bold)
                                     }
                                 }
@@ -404,7 +403,7 @@ fun ApkShieldMainApp() {
                             Icon(Icons.Default.NotificationsNone, contentDescription = null)
                         }
                     },
-                    label = { Text("Activity", fontSize = 11.sp) },
+                    label = { Text("Activity", fontSize = 11.sp, fontWeight = if (selectedTab == 4) FontWeight.Bold else FontWeight.Normal) },
                     colors = navItemColors
                 )
             }
@@ -589,7 +588,7 @@ fun ZeroInstallProDialog(
                             onWatchAdRewardDay()
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = ClaudeDarkTerracotta),
+                    colors = ButtonDefaults.buttonColors(containerColor = ForestGreenPrimary),
                     shape = RoundedCornerShape(10.dp)
                 ) {
                     Text("Watch Ad & Extend +1 Day", color = Color.White, fontWeight = FontWeight.Bold)
@@ -625,21 +624,21 @@ fun ZeroInstallProDialog(
             ) {
                 Spacer(modifier = Modifier.height(6.dp))
 
-                // Emblem (Dark Claude Terracotta & Warm Peach)
+                // Emblem (Forest Green & Mint Badge)
                 Box(
                     modifier = Modifier
                         .size(46.dp)
                         .background(
-                            ClaudePeachBadgeBg,
+                            ForestMintBadgeBg,
                             CircleShape
                         )
-                        .border(1.5.dp, ClaudePeachBadgeBorder, CircleShape),
+                        .border(1.5.dp, ForestMintBadgeBorder, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Shield,
                         contentDescription = null,
-                        tint = ClaudeDarkTerracotta,
+                        tint = ForestGreenPrimary,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -655,7 +654,7 @@ fun ZeroInstallProDialog(
                 )
                 Text(
                     text = "24/7 Automated Device & Link Defense",
-                    color = ClaudeDarkTerracotta,
+                    color = ForestGreenPrimary,
                     fontSize = 11.5.sp,
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Center
@@ -744,13 +743,13 @@ fun ZeroInstallProDialog(
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Surface(
-                                    color = ClaudePeachBadgeBg,
+                                    color = ForestMintBadgeBg,
                                     shape = RoundedCornerShape(50),
-                                    modifier = Modifier.border(1.dp, ClaudePeachBadgeBorder, RoundedCornerShape(50))
+                                    modifier = Modifier.border(1.dp, ForestMintBadgeBorder, RoundedCornerShape(50))
                                 ) {
                                     Text(
                                         "BEST VALUE",
-                                        color = ClaudeDarkTerracotta,
+                                        color = ForestGreenPrimary,
                                         fontSize = 9.sp,
                                         fontWeight = FontWeight.ExtraBold,
                                         modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp)
@@ -767,7 +766,7 @@ fun ZeroInstallProDialog(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = price.yearlyPriceFormatted,
-                            color = ClaudeDarkTerracotta,
+                            color = ForestGreenPrimary,
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.5.sp,
                             maxLines = 1,
@@ -780,11 +779,11 @@ fun ZeroInstallProDialog(
 
                 // 3. Free Option ("Free Forever" / "Watch 1 Ad Extend 1 Day" / "Active: 2 Days 23 Hours 58 Mins")
                 Surface(
-                    color = ClaudeCardWhite,
+                    color = ForestCardWhite,
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, ClaudeBorder, RoundedCornerShape(14.dp))
+                        .border(1.dp, ForestBorder, RoundedCornerShape(14.dp))
                         .clickable {
                             if (!isPlayingRewardedAd) {
                                 showAdConfirmationDialog = true
@@ -803,14 +802,14 @@ fun ZeroInstallProDialog(
                                 horizontalArrangement = Arrangement.Center
                             ) {
                                 CircularProgressIndicator(
-                                    color = ClaudeDarkTerracotta,
+                                    color = ForestGreenPrimary,
                                     strokeWidth = 2.dp,
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = "Playing Video Ad... ${adSecondsLeft}s (+1 Day)",
-                                    color = ClaudeDarkTerracotta,
+                                    color = ForestGreenPrimary,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 13.sp
                                 )
@@ -823,7 +822,7 @@ fun ZeroInstallProDialog(
                                 Icon(
                                     imageVector = Icons.Default.PlayCircleFilled,
                                     contentDescription = null,
-                                    tint = ClaudeDarkTerracotta,
+                                    tint = ForestGreenPrimary,
                                     modifier = Modifier.size(24.dp)
                                 )
                                 Spacer(modifier = Modifier.width(10.dp))
@@ -837,7 +836,7 @@ fun ZeroInstallProDialog(
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
                                         text = "Watch 1 Ad Extend 1 Day",
-                                        color = ClaudeDarkTerracotta,
+                                        color = ForestGreenPrimary,
                                         fontSize = 11.5.sp,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -876,7 +875,7 @@ private fun ProFeatureItem(text: String) {
         Icon(
             imageVector = Icons.Default.CheckCircle,
             contentDescription = null,
-            tint = ClaudeDarkTerracotta,
+            tint = ForestGreenPrimary,
             modifier = Modifier
                 .padding(top = 2.dp)
                 .size(16.dp)
@@ -986,25 +985,25 @@ fun ShieldDashboardTab(
         item {
             Card(
                 colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(24.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
                         Brush.verticalGradient(
                             colors = when {
                                 !blockAllApk -> listOf(DangerBg, SurfaceCard)
-                                else -> listOf(ClaudeCardWhite, ClaudeCardWhite)
+                                else -> listOf(ForestCardWhite, ForestCardWhite)
                             }
                         ),
-                        RoundedCornerShape(16.dp)
+                        RoundedCornerShape(24.dp)
                     )
                     .border(
                         width = 1.dp,
                         color = when {
                             !blockAllApk -> DangerSoft.copy(alpha = 0.5f)
-                            else -> ClaudeBorder
+                            else -> ForestBorder
                         },
-                        shape = RoundedCornerShape(16.dp)
+                        shape = RoundedCornerShape(24.dp)
                     )
             ) {
                 Column(
@@ -1013,103 +1012,94 @@ fun ShieldDashboardTab(
                         .padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Status Pill with Live Pulse Dot
-                    Surface(
-                        color = ClaudePeachBadgeBg,
-                        shape = RoundedCornerShape(20.dp),
+                    // Top Status Row from Screenshot 1: 24/7 ENDPOINT PROTECTION + 9 of 9 Engines Active
+                    Row(
                         modifier = Modifier
-                            .padding(bottom = 16.dp)
-                            .border(1.dp, ClaudePeachBadgeBorder, RoundedCornerShape(20.dp))
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                        Surface(
+                            color = ForestMintBadgeBg,
+                            shape = RoundedCornerShape(20.dp),
+                            modifier = Modifier.border(1.dp, ForestMintBadgeBorder, RoundedCornerShape(20.dp))
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(7.dp)
-                                    .background(if (blockAllApk) ClaudeDarkTerracotta else DangerSoft, CircleShape)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = if (isProUnlocked) "24/7 PRO ENDPOINT PROTECTION" else "STANDARD PROTECTION ACTIVE",
-                                color = if (blockAllApk) ClaudeDarkTerracotta else DangerSoft,
-                                fontSize = 10.5.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 0.5.sp
+                                text = "24/7 ENDPOINT PROTECTION",
+                                color = ForestGreenPrimary,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 0.5.sp,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                             )
                         }
+                        Text(
+                            text = "9 of 9 Engines Active",
+                            color = TextSecondary,
+                            fontSize = 11.5.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
 
-                    // Defender Shield Emblem (Dark Claude Terracotta on Warm Peach Badge)
+                    // Grok Defender Shield Emblem with Mint Aura
                     Box(
-                        modifier = Modifier
-                            .size(if (isProUnlocked) 72.dp else 68.dp)
-                            .background(
-                                when {
-                                    !blockAllApk -> DangerBg
-                                    else -> ClaudePeachBadgeBg
-                                },
-                                CircleShape
-                            )
-                            .border(
-                                width = 2.dp,
-                                color = when {
-                                    !blockAllApk -> DangerSoft
-                                    else -> ClaudePeachBadgeBorder
-                                },
-                                shape = CircleShape
-                            ),
+                        modifier = Modifier.size(175.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         if (isQuickScanning) {
                             CircularProgressIndicator(
-                                color = ClaudeDarkTerracotta,
-                                strokeWidth = 3.dp,
-                                modifier = Modifier.size(40.dp)
+                                color = ForestGreenPrimary,
+                                strokeWidth = 3.5.dp,
+                                modifier = Modifier.size(54.dp)
                             )
+                        } else if (!blockAllApk) {
+                            Box(
+                                modifier = Modifier
+                                    .size(80.dp)
+                                    .background(DangerBg, CircleShape)
+                                    .border(2.dp, DangerSoft, CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Shield,
+                                    contentDescription = null,
+                                    tint = DangerSoft,
+                                    modifier = Modifier.size(42.dp)
+                                )
+                            }
                         } else {
-                            Icon(
-                                imageVector = when {
-                                    !blockAllApk -> Icons.Default.Shield
-                                    else -> Icons.Default.VerifiedUser
-                                },
-                                contentDescription = null,
-                                tint = when {
-                                    !blockAllApk -> DangerSoft
-                                    else -> ClaudeDarkTerracotta
-                                },
-                                modifier = Modifier.size(36.dp)
+                            Image(
+                                painter = painterResource(id = R.drawable.grok_shield_hero),
+                                contentDescription = "Protected Shield",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Fit
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     Text(
                         text = when {
                             isQuickScanning -> "Scanning Device Security..."
-                            isProUnlocked -> "Your Device is Protected"
-                            quickScanComplete -> "Your Phone is Safe & Protected"
-                            blockAllApk -> "Your Phone is Protected"
-                            else -> "Protection Paused"
+                            !blockAllApk -> "Protection Paused"
+                            else -> "Your Phone is Protected"
                         },
                         color = if (blockAllApk) TextPrimary else DangerSoft,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 19.sp,
+                        fontWeight = FontWeight.Black,
+                        fontSize = 22.sp,
+                        letterSpacing = (-0.4).sp,
                         textAlign = TextAlign.Center
                     )
 
                     Spacer(modifier = Modifier.height(4.dp))
 
                     Text(
-                        text = if (isProUnlocked) {
-                            "All real-time defenses, links & app monitors running 24/7"
-                        } else {
-                            "Active protection against unauthorized APK installs & scam links"
-                        },
+                        text = if (blockAllApk) "✓ ZeroPro Guard is working 24/7 to keep you safe." else "Tap below to resume real-time protection.",
                         color = TextSecondary,
-                        fontSize = 12.sp,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
                         textAlign = TextAlign.Center
                     )
 
@@ -1210,32 +1200,33 @@ fun ShieldDashboardTab(
                                 }
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = ClaudeDarkTerracotta),
-                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = ForestGreenPrimary),
+                        shape = RoundedCornerShape(14.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(44.dp)
-                            .border(1.dp, ClaudeDarkTerracotta, RoundedCornerShape(10.dp))
+                            .height(46.dp)
+                            .border(1.dp, ForestGreenPrimary, RoundedCornerShape(14.dp))
                     ) {
                         Icon(
-                            imageVector = if (quickScanComplete) Icons.Default.CheckCircle else Icons.Default.Radar,
+                            imageVector = if (quickScanComplete) Icons.Default.CheckCircle else Icons.Default.Bolt,
                             contentDescription = null,
                             tint = Color.White,
-                            modifier = Modifier.size(17.dp)
+                            modifier = Modifier.size(19.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = if (isQuickScanning) "Checking Device Security..." else if (quickScanComplete) "All Checks Passed • Scan Again" else "Run Security Check",
+                            text = if (isQuickScanning) "CHECKING DEVICE SECURITY..." else if (quickScanComplete) "ALL CHECKS PASSED • SCAN AGAIN" else "RUN SECURITY CHECK",
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 13.5.sp
+                            fontSize = 13.5.sp,
+                            letterSpacing = 0.5.sp
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     Text(
-                        text = if (quickScanComplete) "Last scanned: Just now • Definitions up to date" else "Continuous background protection active",
+                        text = "Last scanned: Just now • Definitions v2026.10",
                         color = TextSecondary,
                         fontSize = 11.sp,
                         textAlign = TextAlign.Center
@@ -1305,17 +1296,17 @@ fun ShieldDashboardTab(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Surface(
-                                    color = if (bankingReport.isAllSafe) ClaudePeachBadgeBg else DangerBg,
+                                    color = if (bankingReport.isAllSafe) ForestMintBadgeBg else DangerBg,
                                     shape = RoundedCornerShape(50),
                                     modifier = Modifier.border(
                                         1.dp,
-                                        if (bankingReport.isAllSafe) ClaudePeachBadgeBorder else DangerSoft,
+                                        if (bankingReport.isAllSafe) ForestMintBadgeBorder else DangerSoft,
                                         RoundedCornerShape(50)
                                     )
                                 ) {
                                     Text(
                                         text = if (bankingReport.isAllSafe) "SAFE TO PAY" else "REVIEW",
-                                        color = if (bankingReport.isAllSafe) ClaudeDarkTerracotta else DangerSoft,
+                                        color = if (bankingReport.isAllSafe) ForestGreenPrimary else DangerSoft,
                                         fontSize = 9.sp,
                                         fontWeight = FontWeight.ExtraBold,
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
@@ -1323,9 +1314,9 @@ fun ShieldDashboardTab(
                                 }
                             }
                             Text(
-                                text = "Run before opening banking or UPI payment apps",
+                                text = "Run before opening banking or UPI apps",
                                 color = TextSecondary,
-                                fontSize = 11.sp
+                                fontSize = 11.5.sp
                             )
                         }
                     }
@@ -1335,8 +1326,8 @@ fun ShieldDashboardTab(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(ClaudeCanvasBg, RoundedCornerShape(10.dp))
-                            .border(1.dp, ClaudeBorder, RoundedCornerShape(10.dp))
+                            .background(ForestCanvasBg, RoundedCornerShape(12.dp))
+                            .border(1.dp, ForestBorder, RoundedCornerShape(12.dp))
                             .padding(12.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
@@ -1376,11 +1367,11 @@ fun ShieldDashboardTab(
                                     }
                                 }
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = ClaudeDarkTerracotta),
+                            colors = ButtonDefaults.buttonColors(containerColor = ForestGreenPrimary),
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier
                                 .weight(1.3f)
-                                .border(1.dp, ClaudeDarkTerracotta, RoundedCornerShape(12.dp)),
+                                .border(1.dp, ForestGreenPrimary, RoundedCornerShape(12.dp)),
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp)
                         ) {
                             Icon(
@@ -1407,15 +1398,22 @@ fun ShieldDashboardTab(
                                 PeopleProtectionTools.scrubClipboard(context)
                                 clipboardClearedJustNow = true
                             },
-                            colors = ButtonDefaults.outlinedButtonColors(containerColor = ClaudeCanvasBg),
-                            border = BorderStroke(1.dp, ClaudeBorder),
+                            colors = ButtonDefaults.outlinedButtonColors(containerColor = ForestCanvasBg),
+                            border = BorderStroke(1.dp, ForestBorder),
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier.weight(1f),
                             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 10.dp)
                         ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = null,
+                                tint = if (clipboardClearedJustNow) ForestGreenPrimary else ForestTextSecondary,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = if (clipboardClearedJustNow) "Clipboard Cleared ✓" else "Clear Copied OTPs",
-                                color = if (clipboardClearedJustNow) ClaudeDarkTerracotta else TextPrimary,
+                                text = if (clipboardClearedJustNow) "Cleared ✓" else "Clear Copied OTPs",
+                                color = if (clipboardClearedJustNow) ForestGreenPrimary else TextPrimary,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 11.sp,
                                 maxLines = 1
@@ -1641,28 +1639,28 @@ fun DataExfiltrationMonitorTab(
                         modifier = Modifier
                             .size(60.dp)
                             .background(
-                                ClaudePeachBadgeBg,
+                                ForestMintBadgeBg,
                                 CircleShape
                             )
-                            .border(1.5.dp, ClaudePeachBadgeBorder, CircleShape),
+                            .border(1.5.dp, ForestMintBadgeBorder, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             Icons.Default.DataUsage,
                             contentDescription = null,
-                            tint = ClaudeDarkTerracotta,
+                            tint = ForestGreenPrimary,
                             modifier = Modifier.size(30.dp)
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     Surface(
-                        color = ClaudePeachBadgeBg,
+                        color = ForestMintBadgeBg,
                         shape = RoundedCornerShape(4.dp),
-                        modifier = Modifier.border(1.dp, ClaudePeachBadgeBorder, RoundedCornerShape(4.dp))
+                        modifier = Modifier.border(1.dp, ForestMintBadgeBorder, RoundedCornerShape(4.dp))
                     ) {
                         Text(
                             text = "24/7 ACTIVE DATA GUARD",
-                            color = ClaudeDarkTerracotta,
+                            color = ForestGreenPrimary,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp)
@@ -1687,7 +1685,7 @@ fun DataExfiltrationMonitorTab(
                     Spacer(modifier = Modifier.height(20.dp))
                     Button(
                         onClick = onOpenPro,
-                        colors = ButtonDefaults.buttonColors(containerColor = ClaudeDarkTerracotta),
+                        colors = ButtonDefaults.buttonColors(containerColor = ForestGreenPrimary),
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -2185,17 +2183,17 @@ fun GhostAndSpywareAuditTab(context: Context) {
                                 ) {
                                     item.dangerousPermissions.forEach { perm ->
                                         Surface(
-                                            color = ClaudePeachBadgeBg,
+                                            color = ForestMintBadgeBg,
                                             shape = RoundedCornerShape(8.dp),
                                             modifier = Modifier.border(
                                                 1.dp,
-                                                ClaudePeachBadgeBorder,
+                                                ForestMintBadgeBorder,
                                                 RoundedCornerShape(8.dp)
                                             )
                                         ) {
                                             Text(
                                                 text = perm,
-                                                color = ClaudeDarkTerracotta,
+                                                color = ForestGreenPrimary,
                                                 fontSize = 11.sp,
                                                 fontWeight = FontWeight.SemiBold,
                                                 modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
@@ -2215,14 +2213,14 @@ fun GhostAndSpywareAuditTab(context: Context) {
                                         }
                                         context.startActivity(infoIntent)
                                     },
-                                    border = BorderStroke(1.dp, ClaudeBorder),
+                                    border = BorderStroke(1.dp, ForestBorder),
                                     shape = RoundedCornerShape(10.dp),
                                     modifier = Modifier.weight(1f)
                                 ) {
                                     Text(
                                         text = if (item.dangerousPermissions.isNotEmpty()) "Review Permissions" else "App Settings",
                                         fontSize = 12.sp,
-                                        color = ClaudeDarkTerracotta,
+                                        color = ForestGreenPrimary,
                                         fontWeight = FontWeight.SemiBold
                                     )
                                 }
@@ -2551,12 +2549,12 @@ private fun ShieldFilterPill(
     onClick: () -> Unit
 ) {
     Surface(
-        color = if (selected) ClaudeDarkTerracotta else ClaudeCanvasBg,
+        color = if (selected) ForestGreenPrimary else ForestCanvasBg,
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier
             .border(
                 width = 1.dp,
-                color = if (selected) ClaudeDarkTerracotta else ClaudeBorder,
+                color = if (selected) ForestGreenPrimary else ForestBorder,
                 shape = RoundedCornerShape(20.dp)
             )
             .clickable { onClick() }
@@ -2621,7 +2619,7 @@ private fun EnginePermissionCard(
                 modifier = Modifier
                     .size(40.dp)
                     .background(
-                        if (isEnabled) EmeraldDark.copy(alpha = 0.7f) else ClaudePeachBadgeBg,
+                        if (isEnabled) EmeraldDark.copy(alpha = 0.7f) else ForestMintBadgeBg,
                         RoundedCornerShape(12.dp)
                     ),
                 contentAlignment = Alignment.Center
@@ -2629,7 +2627,7 @@ private fun EnginePermissionCard(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = if (isEnabled) EmeraldSoft else ClaudeDarkTerracotta,
+                    tint = if (isEnabled) EmeraldSoft else ForestGreenPrimary,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -2645,13 +2643,13 @@ private fun EnginePermissionCard(
                     if (isProFeature && !isProUnlocked) {
                         Spacer(modifier = Modifier.width(6.dp))
                         Surface(
-                            color = ClaudePeachBadgeBg,
+                            color = ForestMintBadgeBg,
                             shape = RoundedCornerShape(50),
-                            modifier = Modifier.border(1.dp, ClaudePeachBadgeBorder, RoundedCornerShape(50))
+                            modifier = Modifier.border(1.dp, ForestMintBadgeBorder, RoundedCornerShape(50))
                         ) {
                             Text(
                                 text = "PRO",
-                                color = ClaudeDarkTerracotta,
+                                color = ForestGreenPrimary,
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
@@ -2675,7 +2673,7 @@ private fun EnginePermissionCard(
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = when {
-                        isProFeature && !isProUnlocked -> ClaudeDarkTerracotta
+                        isProFeature && !isProUnlocked -> ForestGreenPrimary
                         isEnabled -> EmeraldDark
                         else -> EmeraldPrimary
                     }
@@ -2732,18 +2730,35 @@ private fun BankingCheckRow(
     isSafe: Boolean,
     label: String
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            imageVector = if (isSafe) Icons.Default.CheckCircle else Icons.Default.Warning,
-            contentDescription = null,
-            tint = if (isSafe) ClaudeDarkTerracotta else DangerSoft,
-            modifier = Modifier.size(15.dp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.weight(1f)
+        ) {
+            Icon(
+                imageVector = if (isSafe) Icons.Default.CheckCircle else Icons.Default.Warning,
+                contentDescription = null,
+                tint = if (isSafe) ForestGreenPrimary else DangerSoft,
+                modifier = Modifier.size(15.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = label,
+                color = if (isSafe) TextPrimary else DangerSoft,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
         Text(
-            text = label,
-            color = if (isSafe) TextPrimary else DangerSoft,
-            fontSize = 12.sp
+            text = if (isSafe) "PASSED" else "ACTION",
+            color = if (isSafe) ForestGreenPrimary else DangerSoft,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.ExtraBold,
+            letterSpacing = 0.5.sp
         )
     }
 }

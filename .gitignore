@@ -8,3 +8,5 @@ local.properties
 *.jks
 *.keystore
 zeroinstall_website.zip
+dist/
+.github/
