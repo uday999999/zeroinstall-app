@@ -775,25 +775,27 @@ fun ZeroInstallProDialog(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 // 3. Free Option ("Free Forever" / "Watch 1 Ad Extend 1 Day" / "Active: 2 Days 23 Hours 58 Mins")
                 Surface(
-                    color = ForestCardWhite,
+                    color = SurfaceElevated,
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, ForestBorder, RoundedCornerShape(14.dp))
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(14.dp))
                         .clickable {
                             if (!isPlayingRewardedAd) {
                                 showAdConfirmationDialog = true
                             }
                         }
                 ) {
-                    Column(
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 14.dp, vertical = 12.dp)
+                            .padding(14.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         if (isPlayingRewardedAd) {
                             Row(
@@ -816,8 +818,8 @@ fun ZeroInstallProDialog(
                             }
                         } else {
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.weight(1f)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.PlayCircleFilled,
@@ -826,31 +828,55 @@ fun ZeroInstallProDialog(
                                     modifier = Modifier.size(24.dp)
                                 )
                                 Spacer(modifier = Modifier.width(10.dp))
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = "Free Forever",
-                                        color = TextPrimary,
-                                        fontWeight = FontWeight.Black,
-                                        fontSize = 15.sp
-                                    )
+                                Column {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = "Free Forever",
+                                            color = TextPrimary,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 14.sp
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Surface(
+                                            color = ForestMintBadgeBg,
+                                            shape = RoundedCornerShape(50),
+                                            modifier = Modifier.border(1.dp, ForestMintBadgeBorder, RoundedCornerShape(50))
+                                        ) {
+                                            Text(
+                                                "AD-SUPPORTED",
+                                                color = ForestGreenPrimary,
+                                                fontSize = 9.sp,
+                                                fontWeight = FontWeight.ExtraBold,
+                                                modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp)
+                                            )
+                                        }
+                                    }
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
                                         text = "Watch 1 Ad Extend 1 Day",
-                                        color = ForestGreenPrimary,
-                                        fontSize = 11.5.sp,
-                                        fontWeight = FontWeight.Bold
+                                        color = TextSecondary,
+                                        fontSize = 11.sp
                                     )
                                     if (remainingProMs > 0L) {
                                         Spacer(modifier = Modifier.height(2.dp))
                                         Text(
                                             text = "Active: $remainingVerboseFormatted",
-                                            color = TextSecondary,
-                                            fontSize = 11.sp,
+                                            color = ForestGreenPrimary,
+                                            fontSize = 10.5.sp,
                                             fontWeight = FontWeight.SemiBold
                                         )
                                     }
                                 }
                             }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "FREE",
+                                color = ForestGreenPrimary,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.5.sp,
+                                maxLines = 1,
+                                softWrap = false
+                            )
                         }
                     }
                 }
