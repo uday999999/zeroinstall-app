@@ -1,111 +1,198 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Privacy Policy - ZeroPro by ZeroInstall</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body { background-color: #0b0f19; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacy Policy — ZeroPro & ZeroInstall Shield</title>
+    <link rel="canonical" href="https://zeroinstall.app/privacy.html" />
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #090d16;
+            color: #e2e8f0;
+            line-height: 1.7;
+            padding: 40px 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        h1 {
+            color: #ffffff;
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+        h2 {
+            color: #10b981;
+            margin-top: 32px;
+            font-size: 1.25rem;
+            border-bottom: 1px solid #1f2937;
+            padding-bottom: 8px;
+        }
+        h3 {
+            color: #f3f4f6;
+            font-size: 1.05rem;
+            margin-top: 16px;
+            margin-bottom: 6px;
+        }
+        p, li {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        .badge {
+            display: inline-block;
+            background: #064e3b;
+            color: #6ee7b7;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 9999px;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .card {
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: 10px;
+            padding: 16px;
+            margin: 14px 0;
+        }
+        .card-title {
+            color: #38bdf8;
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 6px;
+        }
+        a {
+            color: #10b981;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .footer-note {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #1f2937;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            text-align: center;
+        }
+    </style>
 </head>
-<body class="p-6 md:p-16 max-w-4xl mx-auto">
-  <div class="mb-10 flex items-center justify-between border-b border-[#263246] pb-6">
-    <div class="flex items-center space-x-3">
-      <div class="w-10 h-10 rounded-xl bg-[#0b0f19] border-2 border-[#10b981] flex items-center justify-center">
-        <svg class="w-6 h-6 text-[#10b981]" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5L12 2z"/>
-        </svg>
-      </div>
-      <div>
-        <h1 class="text-2xl font-bold text-white">ZeroPro</h1>
-        <p class="text-xs text-[#10b981] font-semibold">by ZeroInstall • Official Privacy Policy</p>
-      </div>
+<body>
+<div class="container">
+    <span class="badge">Official Legal Document</span>
+    <h1>Privacy Policy — ZeroPro</h1>
+    <p><strong>App Name:</strong> ZeroPro — Mobile Security (also known as ZeroInstall Shield)<br />
+    <strong>Developer:</strong> ZeroInstall (<a href="https://zeroinstall.app">https://zeroinstall.app</a>)<br />
+    <strong>Effective Date:</strong> October 2026</p>
+
+    <p>
+        <strong>ZeroPro</strong> ("the App", "we", "our", or "us") is engineered around a strict <strong>100% On-Device Privacy Architecture</strong>. We believe security software should protect your device without sacrificing your personal privacy. We do not operate external tracking databases, and <strong>we do not collect, transmit, store, sell, or monetize your personal data</strong>.
+    </p>
+
+    <h2>1. Explicit Android Permission Disclosures (Google Play Compliant)</h2>
+    <p>
+        To provide proactive endpoint security against unauthorized APK malware and malicious links, ZeroPro requests specific privileged Android permissions. Each permission is strictly executed locally in on-device memory:
+    </p>
+
+    <div class="card">
+        <div class="card-title">A. Accessibility Service API (BIND_ACCESSIBILITY_SERVICE)</div>
+        <p><strong>Specific Purpose:</strong> Used solely to detect when the system package installer window (e.g. <code>com.google.android.packageinstaller</code> or <code>com.android.packageinstaller</code>) is opened to sideload an unknown <code>.apk</code> file.</p>
+        <p><strong>Strict Privacy Boundaries:</strong></p>
+        <ul>
+            <li>The Accessibility service does <strong>NOT</strong> log, read, or capture user keystrokes, personal messages, passwords, or banking credentials.</li>
+            <li>No screen text or user interactions are recorded, saved to disk, or transmitted off the device.</li>
+            <li>Users can enable or disable this feature at any time in Android Accessibility Settings.</li>
+        </ul>
     </div>
-    <a href="index.html" class="text-xs font-semibold text-slate-400 hover:text-[#10b981] transition">← Back to Home</a>
-  </div>
 
-  <div class="space-y-8 text-slate-300 text-sm leading-relaxed">
-    <p class="text-xs text-slate-400"><strong>Effective Date:</strong> October 2026</p>
+    <div class="card">
+        <div class="card-title">B. Notification Listener Service (BIND_NOTIFICATION_LISTENER_SERVICE)</div>
+        <p><strong>Specific Purpose:</strong> Scans incoming notification messages (such as WhatsApp, Telegram, and SMS) solely to inspect embedded URLs for known phishing domains, bank fraud links, or hidden <code>.apk</code> malware downloads.</p>
+        <p><strong>Strict Privacy Boundaries:</strong></p>
+        <ul>
+            <li>URL evaluation occurs transiently in volatile RAM.</li>
+            <li>Message bodies, chat histories, sender contact details, and OTPs are <strong>never stored, logged, or uploaded</strong> to any cloud or remote server.</li>
+        </ul>
+    </div>
 
-    <section class="space-y-3">
-      <h2 class="text-lg font-bold text-white text-[#10b981]">1. Fundamental Privacy Guarantee: 100% On-Device Processing</h2>
-      <p>
-        <strong>ZeroPro</strong> (developed by <strong>ZeroInstall</strong>) is designed with a strict zero-data-collection philosophy. We believe that security software should protect your privacy, not compromise it. All threat detection, file inspections, notification scans, and security policies execute strictly on your device locally in memory.
-      </p>
-      <p>
-        <strong>We do not collect, transmit, store, sell, or rent your personal information, messages, contacts, location, photos, or browsing history to any third parties or remote servers.</strong>
-      </p>
-    </section>
+    <div class="card">
+        <div class="card-title">C. Query All Packages (QUERY_ALL_PACKAGES)</div>
+        <p><strong>Specific Purpose:</strong> Required strictly on-device to inspect installed applications, uncover invisible background apps without launcher icons (ghost apps), identify sideloaded packages, and audit which apps hold high-risk permissions (Camera, Microphone, Location).</p>
+        <p><strong>Strict Privacy Boundaries:</strong> Your list of installed applications is processed 100% locally on your device and is never shared, sold, or transmitted to any server.</p>
+    </div>
 
-    <section class="space-y-3">
-      <h2 class="text-lg font-bold text-white text-[#10b981]">2. Explicit Android Permission Disclosures</h2>
-      <p>In accordance with Google Play Developer Policies, below are clear and prominent disclosures regarding each privileged permission requested by ZeroPro:</p>
+    <div class="card">
+        <div class="card-title">D. VPN Service (BIND_VPN_SERVICE)</div>
+        <p><strong>Specific Purpose:</strong> Creates a local, on-device loopback interface to act as a local DNS sinkhole firewall, blocking outbound connections to known spyware, telemetry loggers, and ad trackers.</p>
+        <p><strong>Strict Privacy Boundaries:</strong> No remote VPN proxy server is used. Your web traffic is never redirected through any external network, analyzed, or stored.</p>
+    </div>
 
-      <div class="space-y-4 pt-2">
-        <div class="p-4 rounded-xl bg-[#111827] border border-[#263246]">
-          <h3 class="font-bold text-white">A. BIND_ACCESSIBILITY_SERVICE (APK Install Blocker)</h3>
-          <p class="text-xs text-slate-400 mt-1">
-            <strong>Purpose:</strong> ZeroPro uses the Android AccessibilityService API exclusively to detect when an unauthorized APK installer interface (e.g., PackageInstaller or unknown package source prompts) is opened on the screen.
-          </p>
-          <p class="text-xs text-slate-400 mt-1">
-            <strong>Limitation:</strong> The service does NOT observe user keystrokes, personal messages, passwords, or financial transactions. No screen content is ever saved or transmitted off the device.
-          </p>
-        </div>
+    <div class="card">
+        <div class="card-title">E. Device Administrator (BIND_DEVICE_ADMIN)</div>
+        <p><strong>Specific Purpose:</strong> Used solely upon explicit user activation to protect ZeroPro against unauthorized tampering or uninstallation by stealth malware and to enforce system policies blocking unverified APK sources.</p>
+        <p><strong>Strict Privacy Boundaries:</strong> This permission does not access personal data and can be revoked by the user at any time in Settings.</p>
+    </div>
 
-        <div class="p-4 rounded-xl bg-[#111827] border border-[#263246]">
-          <h3 class="font-bold text-white">B. BIND_NOTIFICATION_LISTENER_SERVICE (Message Link Guard)</h3>
-          <p class="text-xs text-slate-400 mt-1">
-            <strong>Purpose:</strong> ZeroPro scans URLs in incoming notifications (such as SMS, WhatsApp, and Telegram) to check whether they contain malicious .apk download links, drive-by malware payloads, or known phishing domains.
-          </p>
-          <p class="text-xs text-slate-400 mt-1">
-            <strong>Limitation:</strong> Links are verified transiently in local RAM. Message texts are never stored, logged, or forwarded anywhere.
-          </p>
-        </div>
+    <h2>2. Zero Data Collection, Transmission, or Sharing</h2>
+    <ul>
+        <li><strong>No Account Required:</strong> You can use ZeroPro without providing an email, phone number, name, or password.</li>
+        <li><strong>No Cloud Storage:</strong> We do not operate external user data databases. Your scanned apps, inspected links, and device metrics stay strictly on your phone.</li>
+        <li><strong>No Selling of Data:</strong> We do not sell, rent, license, or monetize any user data, identifiers, or usage logs to third parties, data brokers, or advertisers.</li>
+    </ul>
 
-        <div class="p-4 rounded-xl bg-[#111827] border border-[#263246]">
-          <h3 class="font-bold text-white">C. VpnService (Local Tracker & Spyware Firewall)</h3>
-          <p class="text-xs text-slate-400 mt-1">
-            <strong>Purpose:</strong> ZeroPro creates a local on-device VPN loopback to inspect outbound domain queries and block known spyware, stalkerware, and invasive telemetry tracking servers.
-          </p>
-          <p class="text-xs text-slate-400 mt-1">
-            <strong>Limitation:</strong> No external VPN server is used. Traffic is NOT redirected to external servers, and user internet traffic is never analyzed or logged.
-          </p>
-        </div>
+    <h2>3. Third-Party Services & Subscriptions</h2>
+    <ul>
+        <li><strong>Google Play In-App Billing:</strong> Subscription payments and transactions are processed entirely and securely by Google Play. We never handle, store, or have access to your credit card or financial details.</li>
+        <li><strong>Rewarded Advertising (Optional Free Access):</strong> For users choosing to unlock Pro features without paying by watching optional rewarded videos, standard anonymized advertising identifiers may be processed by Google-certified ad networks (e.g. Google AdMob) strictly to verify ad view completion. Paid subscribers experience zero advertisements.</li>
+    </ul>
 
-        <div class="p-4 rounded-xl bg-[#111827] border border-[#263246]">
-          <h3 class="font-bold text-white">D. BIND_DEVICE_ADMIN (Tamper & Policy Guard)</h3>
-          <p class="text-xs text-slate-400 mt-1">
-            <strong>Purpose:</strong> Used solely to prevent malware or unauthorized third parties from secretly uninstalling ZeroPro or bypassing "Install Unknown Apps" security policies.
-          </p>
-          <p class="text-xs text-slate-400 mt-1">
-            <strong>Limitation:</strong> Users can deactivate this permission at any time directly through the app or Android device settings.
-          </p>
-        </div>
-      </div>
-    </section>
+    <h2>4. Data Retention and Deletion Rights</h2>
+    <p>
+        Because ZeroPro operates on a 100% on-device architecture and collects zero personal data on external servers, <strong>we hold no user data to retain or delete</strong>. Uninstalling the app instantly purges all local cached definitions and preference files from your device.
+    </p>
 
-    <section class="space-y-3">
-      <h2 class="text-lg font-bold text-white text-[#10b981]">3. Third-Party Services & Advertising</h2>
-      <p>
-        ZeroPro includes an optional rewarded ad extension mechanism for users who choose to unlock Pro days for free. If you choose to watch an ad, standard anonymized advertising identifiers may be processed by certified ad networks (such as Google AdMob) strictly to serve and verify the ad playback. Paid subscribers experience zero ads.
-      </p>
-    </section>
+    <h2>5. Children's Online Privacy (COPPA Compliance)</h2>
+    <p>
+        ZeroPro is a utility security application intended for general audiences aged 18 and older. We do not knowingly target or collect personal information from children under the age of 13 (or under 16 in the European Union).
+    </p>
 
-    <section class="space-y-3">
-      <h2 class="text-lg font-bold text-white text-[#10b981]">4. Contact & Developer Information</h2>
-      <p>If you have any questions, inquiries, or support requests regarding this Privacy Policy or ZeroPro:</p>
-      <ul class="list-disc pl-5 text-xs text-slate-400 space-y-1">
-        <li><strong>App:</strong> ZeroPro</li>
-        <li><strong>Developer:</strong> ZeroInstall</li>
-        <li><strong>Website:</strong> <a href="https://zeroproapp.com" class="text-[#10b981] underline">https://zeroproapp.com</a></li>
-        <li><strong>Email:</strong> support@zeroproapp.com</li>
-      </ul>
-    </section>
-  </div>
+    <h2>6. Limitation of Liability & Warranty Disclaimer (Legal Protection)</h2>
+    <p>
+        ZeroPro is provided on an "AS IS" and "AS AVAILABLE" basis without warranties of any kind, whether express or implied. While ZeroPro employs industry-standard heuristic scanning algorithms to identify threats, no security software can guarantee 100% prevention against all zero-day vulnerabilities or advanced persistent threats.
+    </p>
+    <p>
+        To the maximum extent permitted by applicable law, the developers of ZeroPro and ZeroInstall shall not be held liable for any direct, indirect, incidental, special, or consequential damages resulting from the use or inability to use the application, unauthorized installations, or system modifications.
+    </p>
 
-  <div class="mt-12 pt-6 border-t border-[#263246] text-center text-xs text-slate-500">
-    © 2026 ZeroInstall. All rights reserved. ZeroPro is a registered trademark of ZeroInstall.
-  </div>
+    <h2>7. Contact Information</h2>
+    <p>
+        If you have any questions, feedback, or legal inquiries regarding this Privacy Policy or ZeroPro, please contact our privacy compliance team:
+    </p>
+    <p>
+        <strong>Email:</strong> <a href="mailto:support@zeroinstall.app">support@zeroinstall.app</a><br />
+        <strong>Website:</strong> <a href="https://zeroinstall.app">https://zeroinstall.app</a><br />
+        <strong>Developer:</strong> ZeroInstall Security Team
+    </p>
+
+    <div class="footer-note">
+        © 2026 ZeroInstall. All rights reserved. ZeroPro and ZeroInstall Shield are trademarks of ZeroInstall.
+    </div>
+</div>
 </body>
 </html>
