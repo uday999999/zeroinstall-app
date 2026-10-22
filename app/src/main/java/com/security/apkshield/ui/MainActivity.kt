@@ -276,14 +276,13 @@ fun ApkShieldMainApp() {
                             Box(
                                 modifier = Modifier
                                     .size(36.dp)
-                                    .background(Color(0xFF0B0F19), RoundedCornerShape(10.dp))
-                                    .border(1.5.dp, Color(0xFF10B981), RoundedCornerShape(10.dp)),
+                                    .background(Color(0xFFFACC15), RoundedCornerShape(10.dp)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Shield,
                                     contentDescription = null,
-                                    tint = Color(0xFF10B981),
+                                    tint = Color(0xFF0B0F19),
                                     modifier = Modifier.size(19.dp)
                                 )
                             }
@@ -304,16 +303,11 @@ fun ApkShieldMainApp() {
                             }
                         }
 
-                        // Pro Badge: Shield Logo + PRO in bold letters (Green & Slate Theme)
+                        // Pro Badge: Shield Logo + PRO in bold letters (Yellow Background)
                         Surface(
-                            color = Color(0xFF162820),
+                            color = Color(0xFFFACC15),
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier
-                                .border(
-                                    1.dp,
-                                    Color(0xFF10B981).copy(alpha = 0.75f),
-                                    RoundedCornerShape(8.dp)
-                                )
                                 .clickable { showProModal = true }
                         ) {
                             Row(
@@ -323,13 +317,13 @@ fun ApkShieldMainApp() {
                                 Icon(
                                     imageVector = Icons.Default.Shield,
                                     contentDescription = null,
-                                    tint = Color(0xFF10B981),
+                                    tint = Color(0xFF0B0F19),
                                     modifier = Modifier.size(15.dp)
                                 )
                                 Spacer(modifier = Modifier.width(5.dp))
                                 Text(
                                     text = "PRO",
-                                    color = Color(0xFF10B981),
+                                    color = Color(0xFF0B0F19),
                                     fontSize = 12.5.sp,
                                     fontWeight = FontWeight.Black
                                 )
@@ -379,8 +373,8 @@ fun ApkShieldMainApp() {
                         BadgedBox(
                             badge = {
                                 if (!isProUnlocked) {
-                                    Badge(containerColor = CyanPrimary) {
-                                        Text("PRO", color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.ExtraBold)
+                                    Badge(containerColor = Color(0xFFFACC15)) {
+                                        Text("PRO", color = Color(0xFF0B0F19), fontSize = 8.sp, fontWeight = FontWeight.ExtraBold)
                                     }
                                 }
                             }
@@ -653,21 +647,21 @@ fun ZeroInstallProDialog(
             ) {
                 Spacer(modifier = Modifier.height(6.dp))
 
-                // Emblem (Green & Slate Circle)
+                // Emblem (Yellow Circle with Black Shield)
                 Box(
                     modifier = Modifier
                         .size(46.dp)
                         .background(
-                            Color(0xFF161F30),
+                            Color(0xFFFACC15),
                             CircleShape
                         )
-                        .border(1.5.dp, Color(0xFF10B981), CircleShape),
+                        .border(1.5.dp, Color(0xFFFACC15), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Shield,
                         contentDescription = null,
-                        tint = Color(0xFF10B981),
+                        tint = Color(0xFF0B0F19),
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -1074,15 +1068,15 @@ fun ShieldDashboardTab(
                             .background(
                                 when {
                                     !blockAllApk -> DangerBg
-                                    else -> Color(0xFF162820)
+                                    else -> Color(0xFFFACC15)
                                 },
                                 CircleShape
                             )
                             .border(
-                                width = 1.5.dp,
+                                width = 2.dp,
                                 color = when {
                                     !blockAllApk -> DangerSoft
-                                    else -> Color(0xFF10B981)
+                                    else -> Color(0xFFFACC15)
                                 },
                                 shape = CircleShape
                             ),
@@ -1090,8 +1084,8 @@ fun ShieldDashboardTab(
                     ) {
                         if (isQuickScanning) {
                             CircularProgressIndicator(
-                                color = Color(0xFF10B981),
-                                strokeWidth = 2.5.dp,
+                                color = Color(0xFF0B0F19),
+                                strokeWidth = 3.dp,
                                 modifier = Modifier.size(40.dp)
                             )
                         } else {
@@ -1103,7 +1097,7 @@ fun ShieldDashboardTab(
                                 contentDescription = null,
                                 tint = when {
                                     !blockAllApk -> DangerSoft
-                                    else -> Color(0xFF10B981)
+                                    else -> Color(0xFF0B0F19)
                                 },
                                 modifier = Modifier.size(36.dp)
                             )
@@ -1703,15 +1697,15 @@ fun DataExfiltrationMonitorTab(
                     Spacer(modifier = Modifier.height(20.dp))
                     Button(
                         onClick = onOpenPro,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF10B981)),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFACC15)),
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color.White)
+                        Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFF0B0F19))
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "Unlock 24/7 Data Guard",
-                            color = Color.White,
+                            color = Color(0xFF0B0F19),
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp
                         )
@@ -2661,13 +2655,13 @@ private fun EnginePermissionCard(
                     if (isProFeature && !isProUnlocked) {
                         Spacer(modifier = Modifier.width(6.dp))
                         Surface(
-                            color = CyanDark,
+                            color = Color(0xFFFACC15),
                             shape = RoundedCornerShape(50),
-                            modifier = Modifier.border(1.dp, CyanPrimary.copy(alpha = 0.5f), RoundedCornerShape(50))
+                            modifier = Modifier.border(1.dp, Color(0xFFFACC15), RoundedCornerShape(50))
                         ) {
                             Text(
                                 text = "PRO",
-                                color = CyanSoft,
+                                color = Color(0xFF0B0F19),
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
