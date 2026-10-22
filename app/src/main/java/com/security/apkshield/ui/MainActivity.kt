@@ -92,43 +92,46 @@ data class ShieldPalette(
     val isLight: Boolean
 )
 
-// Chess App Luxury Palette Constants (#F0E8D5, #0B3817, #CDB382, #070D09)
-private val ChessIvoryCream = Color(0xFFF0E8D5)    // Board Light Square Ivory Cream
-private val ChessForestGreen = Color(0xFF0B3817)   // Board Dark Square Forest Green
-private val ChessGoldTrim = Color(0xFFCDB382)      // Board Border & Coordinate Gold
-private val ChessMidnightOnyx = Color(0xFF070D09)  // Deep Midnight Forest Onyx Canvas
-private val ChessCardBg = Color(0xFF0C1810)        // Deep Tournament Forest Slate Cards
-private val ChessCardElevated = Color(0xFF112317)  // Forest Elevated Container
-private val ChessCardBorder = Color(0xFF1D3623)    // Chess Board Subtle Border
+// Falcon Cyber Cobalt Enterprise Palette (CrowdStrike / Palo Alto Networks inspired)
+private val CyberObsidianBg = Color(0xFF080B12)       // Deep Obsidian Canvas
+private val CyberSlateCard = Color(0xFF0E1524)        // Enterprise Slate Cards
+private val CyberSlateElevated = Color(0xFF141D30)    // Elevated Slate Container
+private val CyberBorder = Color(0xFF1E293B)           // Cool Slate Border
+private val CyberCobaltPrimary = Color(0xFF2563EB)    // Electric Cobalt Action Primary
+private val CyberCyanAccent = Color(0xFF00E5FF)       // Cyber Cyan Pulse & Glow
+private val CyberCyanSoft = Color(0xFF60A5FA)         // Soft Cyber Blue Text & Icons
+private val CyberBadgeBg = Color(0x262563EB)          // 15% Cobalt Badge Fill
+private val CyberBadgeBorder = Color(0x662563EB)      // 40% Cobalt Badge Border
+private val CyberTextPrimary = Color(0xFFF8FAFC)      // Crisp Titanium White
+private val CyberTextSecondary = Color(0xFF94A3B8)    // Slate Gray Muted Text
 
-// Chess Grandmaster Security Palette (from Chess App theme)
-private val ChessGrandmasterPalette = ShieldPalette(
-    bgDeepSlate = ChessMidnightOnyx,      // Midnight Forest Canvas
-    surfaceCard = ChessCardBg,            // Deep Forest Slate Cards
-    surfaceElevated = ChessCardElevated,  // Forest Elevated Container
-    borderSubtle = ChessCardBorder,       // Chess Board Subtle Border
-    emeraldPrimary = ChessGoldTrim,       // Antique Gold Active Accent
-    emeraldSoft = ChessIvoryCream,        // Warm Ivory Cream
-    emeraldDark = ChessForestGreen,       // Dark Forest Green Container
-    cyanPrimary = ChessGoldTrim,          // Antique Gold Accent
-    cyanSoft = ChessIvoryCream,           // Warm Ivory Accent
-    cyanDark = ChessForestGreen,          // Dark Green Container
-    textPrimary = Color(0xFFF7F4EB),      // Warm Ivory Typography
-    textSecondary = Color(0xFF8FA093),    // Soft Parchment Description Text
-    dangerSoft = Color(0xFFEF4444),       // Vivid Alert Red
-    dangerBg = Color(0xFF2D1217),         // Dark Alert Container
-    proGold = ChessGoldTrim,              // Antique Gold Accent
-    proGoldSoft = ChessIvoryCream,        // Ivory Cream Accent
-    proGoldDark = ChessForestGreen,       // Forest Green Container
-    proCardBg = ChessCardBg,              // Forest Card
-    proBorder = ChessGoldTrim,            // Gold Border
+private val FalconEnterprisePalette = ShieldPalette(
+    bgDeepSlate = CyberObsidianBg,
+    surfaceCard = CyberSlateCard,
+    surfaceElevated = CyberSlateElevated,
+    borderSubtle = CyberBorder,
+    emeraldPrimary = CyberCobaltPrimary,
+    emeraldSoft = CyberCyanSoft,
+    emeraldDark = CyberBadgeBg,
+    cyanPrimary = CyberCyanAccent,
+    cyanSoft = CyberCyanSoft,
+    cyanDark = CyberSlateElevated,
+    textPrimary = CyberTextPrimary,
+    textSecondary = CyberTextSecondary,
+    dangerSoft = Color(0xFFEF4444),
+    dangerBg = Color(0xFF2E1015),
+    proGold = CyberCobaltPrimary,
+    proGoldSoft = CyberCyanSoft,
+    proGoldDark = CyberBadgeBg,
+    proCardBg = CyberSlateCard,
+    proBorder = CyberBadgeBorder,
     isLight = false
 )
 
-private val FreeDarkPalette = ChessGrandmasterPalette
-private val ProLightPalette = ChessGrandmasterPalette
+private val FreeDarkPalette = FalconEnterprisePalette
+private val ProLightPalette = FalconEnterprisePalette
 
-private val LocalShieldPalette = staticCompositionLocalOf { ChessGrandmasterPalette }
+private val LocalShieldPalette = staticCompositionLocalOf { FalconEnterprisePalette }
 
 private val BgDeepSlate: Color @Composable get() = LocalShieldPalette.current.bgDeepSlate
 private val SurfaceCard: Color @Composable get() = LocalShieldPalette.current.surfaceCard
@@ -159,7 +162,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val isProUnlocked by ShieldRepository.isProUnlocked.collectAsState()
-            val palette = ChessGrandmasterPalette
+            val palette = FalconEnterprisePalette
 
             val view = LocalView.current
             if (!view.isInEditMode) {
@@ -173,17 +176,17 @@ class MainActivity : ComponentActivity() {
             CompositionLocalProvider(LocalShieldPalette provides palette) {
                 MaterialTheme(
                     colorScheme = darkColorScheme(
-                        primary = ChessGoldTrim,
-                        secondary = ChessIvoryCream,
-                        background = ChessMidnightOnyx,
-                        surface = ChessCardBg,
-                        surfaceVariant = ChessCardElevated,
-                        onPrimary = ChessForestGreen,
-                        onSecondary = ChessForestGreen,
+                        primary = CyberCobaltPrimary,
+                        secondary = CyberCyanSoft,
+                        background = CyberObsidianBg,
+                        surface = CyberSlateCard,
+                        surfaceVariant = CyberSlateElevated,
+                        onPrimary = Color.White,
+                        onSecondary = Color.White,
                         onBackground = palette.textPrimary,
                         onSurface = palette.textPrimary,
-                        onSurfaceVariant = Color(0xFF8FA093),
-                        outline = ChessCardBorder
+                        onSurfaceVariant = CyberTextSecondary,
+                        outline = CyberBorder
                     )
                 ) {
                     ApkShieldMainApp()
@@ -275,14 +278,14 @@ fun ApkShieldMainApp() {
                             Box(
                                 modifier = Modifier
                                     .size(36.dp)
-                                    .background(ChessIvoryCream, RoundedCornerShape(10.dp))
-                                    .border(1.dp, ChessGoldTrim, RoundedCornerShape(10.dp)),
+                                    .background(CyberCobaltPrimary, RoundedCornerShape(10.dp))
+                                    .border(1.dp, CyberCyanSoft.copy(alpha = 0.5f), RoundedCornerShape(10.dp)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Shield,
                                     contentDescription = null,
-                                    tint = ChessForestGreen,
+                                    tint = Color.White,
                                     modifier = Modifier.size(19.dp)
                                 )
                             }
@@ -297,18 +300,18 @@ fun ApkShieldMainApp() {
                                 Text(
                                     text = "by ZeroInstall",
                                     fontSize = 11.sp,
-                                    color = ChessGoldTrim,
+                                    color = CyberCyanSoft,
                                     fontWeight = FontWeight.SemiBold
                                 )
                             }
                         }
 
-                        // Pro Badge: Shield Logo + PRO in bold letters (Chess Ivory Cream & Forest Green)
+                        // Pro Badge: Shield Logo + PRO in bold letters
                         Surface(
-                            color = ChessIvoryCream,
+                            color = CyberBadgeBg,
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier
-                                .border(1.dp, ChessGoldTrim, RoundedCornerShape(8.dp))
+                                .border(1.dp, CyberBadgeBorder, RoundedCornerShape(8.dp))
                                 .clickable { showProModal = true }
                         ) {
                             Row(
@@ -318,13 +321,13 @@ fun ApkShieldMainApp() {
                                 Icon(
                                     imageVector = Icons.Default.Shield,
                                     contentDescription = null,
-                                    tint = ChessForestGreen,
+                                    tint = CyberCyanSoft,
                                     modifier = Modifier.size(15.dp)
                                 )
                                 Spacer(modifier = Modifier.width(5.dp))
                                 Text(
                                     text = "PRO",
-                                    color = ChessForestGreen,
+                                    color = CyberCyanSoft,
                                     fontSize = 12.5.sp,
                                     fontWeight = FontWeight.Black
                                 )
@@ -336,14 +339,14 @@ fun ApkShieldMainApp() {
         },
         bottomBar = {
             val navItemColors = NavigationBarItemDefaults.colors(
-                selectedIconColor = ChessIvoryCream,
-                selectedTextColor = ChessGoldTrim,
-                indicatorColor = ChessForestGreen,
-                unselectedIconColor = Color(0xFF8FA093),
-                unselectedTextColor = Color(0xFF8FA093)
+                selectedIconColor = Color.White,
+                selectedTextColor = CyberCyanSoft,
+                indicatorColor = Color(0x332563EB),
+                unselectedIconColor = CyberTextSecondary,
+                unselectedTextColor = CyberTextSecondary
             )
             NavigationBar(
-                containerColor = ChessMidnightOnyx,
+                containerColor = CyberObsidianBg,
                 tonalElevation = 0.dp
             ) {
                 NavigationBarItem(
@@ -367,8 +370,8 @@ fun ApkShieldMainApp() {
                         BadgedBox(
                             badge = {
                                 if (!isProUnlocked) {
-                                    Badge(containerColor = ChessIvoryCream) {
-                                        Text("PRO", color = ChessForestGreen, fontSize = 8.sp, fontWeight = FontWeight.ExtraBold)
+                                    Badge(containerColor = CyberCobaltPrimary) {
+                                        Text("PRO", color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.ExtraBold)
                                     }
                                 }
                             }
@@ -393,8 +396,8 @@ fun ApkShieldMainApp() {
                         BadgedBox(
                             badge = {
                                 if (threatEvents.isNotEmpty()) {
-                                    Badge(containerColor = ChessGoldTrim) {
-                                        Text("${threatEvents.size}", color = ChessForestGreen, fontWeight = FontWeight.Bold)
+                                    Badge(containerColor = CyberCobaltPrimary) {
+                                        Text("${threatEvents.size}", color = Color.White, fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
@@ -587,11 +590,11 @@ fun ZeroInstallProDialog(
                             onWatchAdRewardDay()
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = ChessIvoryCream),
+                    colors = ButtonDefaults.buttonColors(containerColor = CyberCobaltPrimary),
                     shape = RoundedCornerShape(10.dp),
-                    modifier = Modifier.border(1.dp, ChessGoldTrim, RoundedCornerShape(10.dp))
+                    modifier = Modifier.border(1.dp, Color(0xFF3B82F6), RoundedCornerShape(10.dp))
                 ) {
-                    Text("Watch Ad & Extend +1 Day", color = ChessForestGreen, fontWeight = FontWeight.Bold)
+                    Text("Watch Ad & Extend +1 Day", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
@@ -624,21 +627,21 @@ fun ZeroInstallProDialog(
             ) {
                 Spacer(modifier = Modifier.height(6.dp))
 
-                // Emblem (Chess Ivory Cream with Gold Trim & Forest Green Shield)
+                // Emblem (Cyber Cobalt Fill with Cyan Accent Shield)
                 Box(
                     modifier = Modifier
                         .size(46.dp)
                         .background(
-                            ChessIvoryCream,
+                            CyberBadgeBg,
                             CircleShape
                         )
-                        .border(1.5.dp, ChessGoldTrim, CircleShape),
+                        .border(1.5.dp, CyberBadgeBorder, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Shield,
                         contentDescription = null,
-                        tint = ChessForestGreen,
+                        tint = CyberCyanSoft,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -654,7 +657,7 @@ fun ZeroInstallProDialog(
                 )
                 Text(
                     text = "24/7 Automated Device & Link Defense",
-                    color = ChessGoldTrim,
+                    color = CyberCyanSoft,
                     fontSize = 11.5.sp,
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Center
@@ -743,13 +746,13 @@ fun ZeroInstallProDialog(
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Surface(
-                                    color = ChessForestGreen,
+                                    color = CyberBadgeBg,
                                     shape = RoundedCornerShape(50),
-                                    modifier = Modifier.border(1.dp, ChessGoldTrim, RoundedCornerShape(50))
+                                    modifier = Modifier.border(1.dp, CyberBadgeBorder, RoundedCornerShape(50))
                                 ) {
                                     Text(
                                         "BEST VALUE",
-                                        color = ChessGoldTrim,
+                                        color = CyberCyanSoft,
                                         fontSize = 9.sp,
                                         fontWeight = FontWeight.ExtraBold,
                                         modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp)
@@ -766,7 +769,7 @@ fun ZeroInstallProDialog(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = price.yearlyPriceFormatted,
-                            color = ChessGoldTrim,
+                            color = CyberCyanSoft,
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.5.sp,
                             maxLines = 1,
@@ -779,11 +782,11 @@ fun ZeroInstallProDialog(
 
                 // 3. Free Option ("Free Forever" / "Watch 1 Ad Extend 1 Day" / "Active: 2 Days 23 Hours 58 Mins")
                 Surface(
-                    color = ChessIvoryCream,
+                    color = CyberSlateElevated,
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, ChessGoldTrim, RoundedCornerShape(14.dp))
+                        .border(1.dp, CyberBorder, RoundedCornerShape(14.dp))
                         .clickable {
                             if (!isPlayingRewardedAd) {
                                 showAdConfirmationDialog = true
@@ -802,14 +805,14 @@ fun ZeroInstallProDialog(
                                 horizontalArrangement = Arrangement.Center
                             ) {
                                 CircularProgressIndicator(
-                                    color = ChessForestGreen,
+                                    color = CyberCyanAccent,
                                     strokeWidth = 2.dp,
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = "Playing Video Ad... ${adSecondsLeft}s (+1 Day)",
-                                    color = ChessForestGreen,
+                                    color = CyberCyanSoft,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 13.sp
                                 )
@@ -822,21 +825,21 @@ fun ZeroInstallProDialog(
                                 Icon(
                                     imageVector = Icons.Default.PlayCircleFilled,
                                     contentDescription = null,
-                                    tint = ChessForestGreen,
+                                    tint = CyberCyanSoft,
                                     modifier = Modifier.size(24.dp)
                                 )
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = "Free Forever",
-                                        color = ChessForestGreen,
+                                        color = TextPrimary,
                                         fontWeight = FontWeight.Black,
                                         fontSize = 15.sp
                                     )
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
                                         text = "Watch 1 Ad Extend 1 Day",
-                                        color = ChessForestGreen.copy(alpha = 0.90f),
+                                        color = CyberCyanSoft,
                                         fontSize = 11.5.sp,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -844,7 +847,7 @@ fun ZeroInstallProDialog(
                                         Spacer(modifier = Modifier.height(2.dp))
                                         Text(
                                             text = "Active: $remainingVerboseFormatted",
-                                            color = ChessForestGreen.copy(alpha = 0.80f),
+                                            color = CyberTextSecondary,
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.SemiBold
                                         )
@@ -875,7 +878,7 @@ private fun ProFeatureItem(text: String) {
         Icon(
             imageVector = Icons.Default.CheckCircle,
             contentDescription = null,
-            tint = ChessGoldTrim,
+            tint = CyberCyanSoft,
             modifier = Modifier
                 .padding(top = 2.dp)
                 .size(16.dp)
@@ -992,7 +995,7 @@ fun ShieldDashboardTab(
                         Brush.verticalGradient(
                             colors = when {
                                 !blockAllApk -> listOf(DangerBg, SurfaceCard)
-                                else -> listOf(ChessCardElevated, ChessCardBg)
+                                else -> listOf(CyberSlateElevated, CyberSlateCard)
                             }
                         ),
                         RoundedCornerShape(16.dp)
@@ -1001,7 +1004,7 @@ fun ShieldDashboardTab(
                         width = 1.dp,
                         color = when {
                             !blockAllApk -> DangerSoft.copy(alpha = 0.5f)
-                            else -> ChessGoldTrim.copy(alpha = 0.45f)
+                            else -> CyberBorder
                         },
                         shape = RoundedCornerShape(16.dp)
                     )
@@ -1014,11 +1017,11 @@ fun ShieldDashboardTab(
                 ) {
                     // Status Pill with Live Pulse Dot
                     Surface(
-                        color = ChessForestGreen,
+                        color = CyberBadgeBg,
                         shape = RoundedCornerShape(20.dp),
                         modifier = Modifier
                             .padding(bottom = 16.dp)
-                            .border(1.dp, ChessGoldTrim.copy(alpha = 0.45f), RoundedCornerShape(20.dp))
+                            .border(1.dp, CyberBadgeBorder, RoundedCornerShape(20.dp))
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
@@ -1027,12 +1030,12 @@ fun ShieldDashboardTab(
                             Box(
                                 modifier = Modifier
                                     .size(7.dp)
-                                    .background(if (blockAllApk) ChessGoldTrim else DangerSoft, CircleShape)
+                                    .background(if (blockAllApk) CyberCyanAccent else DangerSoft, CircleShape)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = if (isProUnlocked) "24/7 PRO ENDPOINT PROTECTION" else "STANDARD PROTECTION ACTIVE",
-                                color = if (blockAllApk) ChessIvoryCream else DangerSoft,
+                                color = if (blockAllApk) CyberCyanSoft else DangerSoft,
                                 fontSize = 10.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 0.5.sp
@@ -1040,14 +1043,14 @@ fun ShieldDashboardTab(
                         }
                     }
 
-                    // Defender Shield Emblem (Chess Ivory Cream & Forest Green)
+                    // Defender Shield Emblem (Cyber Badge with Cyan Accent Shield)
                     Box(
                         modifier = Modifier
                             .size(if (isProUnlocked) 72.dp else 68.dp)
                             .background(
                                 when {
                                     !blockAllApk -> DangerBg
-                                    else -> ChessIvoryCream
+                                    else -> CyberBadgeBg
                                 },
                                 CircleShape
                             )
@@ -1055,7 +1058,7 @@ fun ShieldDashboardTab(
                                 width = 2.dp,
                                 color = when {
                                     !blockAllApk -> DangerSoft
-                                    else -> ChessGoldTrim
+                                    else -> CyberBadgeBorder
                                 },
                                 shape = CircleShape
                             ),
@@ -1063,7 +1066,7 @@ fun ShieldDashboardTab(
                     ) {
                         if (isQuickScanning) {
                             CircularProgressIndicator(
-                                color = ChessForestGreen,
+                                color = CyberCyanAccent,
                                 strokeWidth = 3.dp,
                                 modifier = Modifier.size(40.dp)
                             )
@@ -1076,7 +1079,7 @@ fun ShieldDashboardTab(
                                 contentDescription = null,
                                 tint = when {
                                     !blockAllApk -> DangerSoft
-                                    else -> ChessForestGreen
+                                    else -> CyberCyanSoft
                                 },
                                 modifier = Modifier.size(36.dp)
                             )
@@ -1093,7 +1096,7 @@ fun ShieldDashboardTab(
                             blockAllApk -> "Your Phone is Protected"
                             else -> "Protection Paused"
                         },
-                        color = if (blockAllApk) ChessIvoryCream else DangerSoft,
+                        color = if (blockAllApk) TextPrimary else DangerSoft,
                         fontWeight = FontWeight.Bold,
                         fontSize = 19.sp,
                         textAlign = TextAlign.Center
@@ -1209,23 +1212,23 @@ fun ShieldDashboardTab(
                                 }
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = ChessIvoryCream),
+                        colors = ButtonDefaults.buttonColors(containerColor = CyberCobaltPrimary),
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(44.dp)
-                            .border(1.dp, ChessGoldTrim, RoundedCornerShape(10.dp))
+                            .border(1.dp, Color(0xFF3B82F6), RoundedCornerShape(10.dp))
                     ) {
                         Icon(
                             imageVector = if (quickScanComplete) Icons.Default.CheckCircle else Icons.Default.Radar,
                             contentDescription = null,
-                            tint = ChessForestGreen,
+                            tint = Color.White,
                             modifier = Modifier.size(17.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = if (isQuickScanning) "Checking Device Security..." else if (quickScanComplete) "All Checks Passed • Scan Again" else "Run Security Check",
-                            color = ChessForestGreen,
+                            color = Color.White,
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.5.sp
                         )
@@ -1304,17 +1307,17 @@ fun ShieldDashboardTab(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Surface(
-                                    color = if (bankingReport.isAllSafe) ChessForestGreen else DangerBg,
+                                    color = if (bankingReport.isAllSafe) CyberBadgeBg else DangerBg,
                                     shape = RoundedCornerShape(50),
                                     modifier = Modifier.border(
                                         1.dp,
-                                        if (bankingReport.isAllSafe) ChessGoldTrim.copy(alpha = 0.5f) else DangerSoft,
+                                        if (bankingReport.isAllSafe) CyberBadgeBorder else DangerSoft,
                                         RoundedCornerShape(50)
                                     )
                                 ) {
                                     Text(
                                         text = if (bankingReport.isAllSafe) "SAFE TO PAY" else "REVIEW",
-                                        color = if (bankingReport.isAllSafe) ChessGoldTrim else DangerSoft,
+                                        color = if (bankingReport.isAllSafe) CyberCyanSoft else DangerSoft,
                                         fontSize = 9.sp,
                                         fontWeight = FontWeight.ExtraBold,
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
@@ -1375,17 +1378,17 @@ fun ShieldDashboardTab(
                                     }
                                 }
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = ChessIvoryCream),
+                            colors = ButtonDefaults.buttonColors(containerColor = CyberCobaltPrimary),
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier
                                 .weight(1.3f)
-                                .border(1.dp, ChessGoldTrim, RoundedCornerShape(12.dp)),
+                                .border(1.dp, Color(0xFF3B82F6), RoundedCornerShape(12.dp)),
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp)
                         ) {
                             Icon(
                                 imageVector = if (bankingVerifiedJustNow) Icons.Default.Verified else Icons.Default.Shield,
                                 contentDescription = null,
-                                tint = ChessForestGreen,
+                                tint = Color.White,
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
@@ -1395,7 +1398,7 @@ fun ShieldDashboardTab(
                                     bankingVerifiedJustNow -> "Verified Safe"
                                     else -> "Verify Now"
                                 },
-                                color = ChessForestGreen,
+                                color = Color.White,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp
                             )
@@ -1406,15 +1409,15 @@ fun ShieldDashboardTab(
                                 PeopleProtectionTools.scrubClipboard(context)
                                 clipboardClearedJustNow = true
                             },
-                            colors = ButtonDefaults.outlinedButtonColors(containerColor = ChessCardElevated),
-                            border = BorderStroke(1.dp, ChessCardBorder),
+                            colors = ButtonDefaults.outlinedButtonColors(containerColor = CyberSlateElevated),
+                            border = BorderStroke(1.dp, CyberBorder),
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier.weight(1f),
                             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 10.dp)
                         ) {
                             Text(
                                 text = if (clipboardClearedJustNow) "Clipboard Cleared ✓" else "Clear Copied OTPs",
-                                color = if (clipboardClearedJustNow) ChessGoldTrim else ChessIvoryCream,
+                                color = if (clipboardClearedJustNow) CyberCyanSoft else Color(0xFFCBD5E1),
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 11.sp,
                                 maxLines = 1
@@ -1640,28 +1643,28 @@ fun DataExfiltrationMonitorTab(
                         modifier = Modifier
                             .size(60.dp)
                             .background(
-                                ChessIvoryCream,
+                                CyberBadgeBg,
                                 CircleShape
                             )
-                            .border(1.5.dp, ChessGoldTrim, CircleShape),
+                            .border(1.5.dp, CyberBadgeBorder, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             Icons.Default.DataUsage,
                             contentDescription = null,
-                            tint = ChessForestGreen,
+                            tint = CyberCyanSoft,
                             modifier = Modifier.size(30.dp)
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     Surface(
-                        color = ChessForestGreen,
+                        color = CyberBadgeBg,
                         shape = RoundedCornerShape(4.dp),
-                        modifier = Modifier.border(1.dp, ChessGoldTrim.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+                        modifier = Modifier.border(1.dp, CyberBadgeBorder, RoundedCornerShape(4.dp))
                     ) {
                         Text(
                             text = "24/7 ACTIVE DATA GUARD",
-                            color = ChessGoldTrim,
+                            color = CyberCyanSoft,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp)
@@ -1686,15 +1689,15 @@ fun DataExfiltrationMonitorTab(
                     Spacer(modifier = Modifier.height(20.dp))
                     Button(
                         onClick = onOpenPro,
-                        colors = ButtonDefaults.buttonColors(containerColor = ChessIvoryCream),
+                        colors = ButtonDefaults.buttonColors(containerColor = CyberCobaltPrimary),
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = ChessForestGreen)
+                        Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color.White)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "Unlock 24/7 Data Guard",
-                            color = ChessForestGreen,
+                            color = Color.White,
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp
                         )
@@ -2188,13 +2191,13 @@ fun GhostAndSpywareAuditTab(context: Context) {
                                             shape = RoundedCornerShape(8.dp),
                                             modifier = Modifier.border(
                                                 1.dp,
-                                                ChessGoldTrim.copy(alpha = 0.4f),
+                                                CyberBadgeBorder,
                                                 RoundedCornerShape(8.dp)
                                             )
                                         ) {
                                             Text(
                                                 text = perm,
-                                                color = ChessGoldTrim,
+                                                color = CyberCyanSoft,
                                                 fontSize = 11.sp,
                                                 fontWeight = FontWeight.SemiBold,
                                                 modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
@@ -2214,14 +2217,14 @@ fun GhostAndSpywareAuditTab(context: Context) {
                                         }
                                         context.startActivity(infoIntent)
                                     },
-                                    border = BorderStroke(1.dp, ChessGoldTrim.copy(alpha = 0.45f)),
+                                    border = BorderStroke(1.dp, CyberBorder),
                                     shape = RoundedCornerShape(10.dp),
                                     modifier = Modifier.weight(1f)
                                 ) {
                                     Text(
                                         text = if (item.dangerousPermissions.isNotEmpty()) "Review Permissions" else "App Settings",
                                         fontSize = 12.sp,
-                                        color = ChessGoldTrim,
+                                        color = CyberCyanSoft,
                                         fontWeight = FontWeight.SemiBold
                                     )
                                 }
@@ -2550,19 +2553,19 @@ private fun ShieldFilterPill(
     onClick: () -> Unit
 ) {
     Surface(
-        color = if (selected) ChessForestGreen else SurfaceElevated,
+        color = if (selected) CyberCobaltPrimary else SurfaceElevated,
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier
             .border(
                 width = 1.dp,
-                color = if (selected) ChessGoldTrim else BorderSubtle,
+                color = if (selected) Color(0xFF3B82F6) else BorderSubtle,
                 shape = RoundedCornerShape(20.dp)
             )
             .clickable { onClick() }
     ) {
         Text(
             text = label,
-            color = if (selected) ChessGoldTrim else TextSecondary,
+            color = if (selected) Color.White else TextSecondary,
             fontSize = 11.5.sp,
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
@@ -2644,13 +2647,13 @@ private fun EnginePermissionCard(
                     if (isProFeature && !isProUnlocked) {
                         Spacer(modifier = Modifier.width(6.dp))
                         Surface(
-                            color = ChessIvoryCream,
+                            color = CyberBadgeBg,
                             shape = RoundedCornerShape(50),
-                            modifier = Modifier.border(1.dp, ChessGoldTrim, RoundedCornerShape(50))
+                            modifier = Modifier.border(1.dp, CyberBadgeBorder, RoundedCornerShape(50))
                         ) {
                             Text(
                                 text = "PRO",
-                                color = ChessForestGreen,
+                                color = CyberCyanSoft,
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
@@ -2735,7 +2738,7 @@ private fun BankingCheckRow(
         Icon(
             imageVector = if (isSafe) Icons.Default.CheckCircle else Icons.Default.Warning,
             contentDescription = null,
-            tint = if (isSafe) ChessGoldTrim else DangerSoft,
+            tint = if (isSafe) CyberCyanSoft else DangerSoft,
             modifier = Modifier.size(15.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
