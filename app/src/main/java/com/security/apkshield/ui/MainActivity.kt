@@ -19,6 +19,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.animation.core.*
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -195,9 +196,149 @@ class MainActivity : ComponentActivity() {
                         outline = ForestBorder
                     )
                 ) {
-                    ApkShieldMainApp()
+                    var isLaunching by remember { mutableStateOf(true) }
+
+                    if (isLaunching) {
+                        AppLaunchAnimationScreen(
+                            onAnimationFinished = { isLaunching = false }
+                        )
+                    } else {
+                        ApkShieldMainApp()
+                    }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun AppLaunchAnimationScreen(onAnimationFinished: () -> Unit) {
+    var startAnim by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        startAnim = true
+        delay(1800L)
+        onAnimationFinished()
+    }
+
+    val scale by animateFloatAsState(
+        targetValue = if (startAnim) 1f else 0.45f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "launch_shield_scale"
+    )
+
+    val alpha by animateFloatAsState(
+        targetValue = if (startAnim) 1f else 0f,
+        animationSpec = tween(700, easing = FastOutSlowInEasing),
+        label = "launch_content_alpha"
+    )
+
+    val infiniteTransition = rememberInfiniteTransition(label = "launch_aura_pulse")
+    val auraScale by infiniteTransition.animateFloat(
+        initialValue = 0.95f,
+        targetValue = 1.05f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1300, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "launch_aura_scale"
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(ForestCanvasBg),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(24.dp)
+        ) {
+            // Grok Shield with Pulsing Aura
+            Box(
+                modifier = Modifier
+                    .size(190.dp)
+                    .scale(scale * auraScale),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.grok_shield_hero),
+                    contentDescription = "ZeroPro Guard Shield",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit
+                )
+            }
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            // Brand Typography
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.alpha(alpha)
+            ) {
+                Text(
+                    text = "ZeroPro Guard",
+                    color = ForestTextPrimary,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 28.sp,
+                    letterSpacing = (-0.5).sp
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Smart Protection. Zero Compromise.",
+                    color = ForestTextSecondary,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Engine status indicator pill
+                Surface(
+                    color = ForestMintBadgeBg,
+                    shape = RoundedCornerShape(50),
+                    modifier = Modifier.border(1.dp, ForestMintBadgeBorder, RoundedCornerShape(50))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(7.dp)
+                                .background(ForestGreenPrimary, CircleShape)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "INITIALIZING 9 ENGINES",
+                            color = ForestGreenPrimary,
+                            fontWeight = FontWeight.Black,
+                            fontSize = 11.sp,
+                            letterSpacing = 0.8.sp
+                        )
+                    }
+                }
+            }
+        }
+
+        // Bottom Brand / Version
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(bottom = 24.dp)
+                .alpha(alpha)
+        ) {
+            Text(
+                text = "Endpoint Security • v1.0.0",
+                color = ForestTextSecondary.copy(alpha = 0.7f),
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium
+            )
         }
     }
 }
