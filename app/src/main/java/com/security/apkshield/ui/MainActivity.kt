@@ -43,7 +43,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.core.view.WindowCompat
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -1502,6 +1505,22 @@ fun ShieldDashboardTab(
     var isDeviceAdminActive by remember { mutableStateOf(ShieldDeviceAdminReceiver.isAdminActive(context)) }
     var isVpnRunning by remember { mutableStateOf(TrackerBlockVpnService.isVpnActive) }
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                isAccessibilityActive = isAccessibilityServiceEnabled(context)
+                isNotificationGuardActive = isNotificationListenerEnabled(context)
+                isDeviceAdminActive = ShieldDeviceAdminReceiver.isAdminActive(context)
+                isVpnRunning = TrackerBlockVpnService.isVpnActive
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     var pendingDisclosure by remember { mutableStateOf<ProminentDisclosureType?>(null) }
     var isQuickScanning by remember { mutableStateOf(false) }
     var quickScanComplete by remember { mutableStateOf(false) }
@@ -1826,7 +1845,242 @@ fun ShieldDashboardTab(
             }
         }
 
-        // 2. Daily Feature: "Safe for Banking & UPI" Live Readiness Check + OTP Clipboard Scrubber
+        // 2. Action Required: Permissions for 100% Security Protection
+        item {
+            val needsPermissions = !isAccessibilityActive || !isNotificationGuardActive
+
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = if (needsPermissions) SurfaceCard else ForestCardWhite
+                ),
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(
+                        1.dp,
+                        if (needsPermissions) DangerSoft.copy(alpha = 0.55f) else ForestMintBadgeBorder,
+                        RoundedCornerShape(20.dp)
+                    )
+            ) {
+                Column(modifier = Modifier.padding(18.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(42.dp)
+                                .background(
+                                    if (needsPermissions) DangerBg else ForestMintBadgeBg,
+                                    RoundedCornerShape(12.dp)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = if (needsPermissions) Icons.Default.Shield else Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = if (needsPermissions) DangerSoft else ForestGreenPrimary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = if (needsPermissions) "Action Required to Get Secure" else "100% Protected & Secure",
+                                color = TextPrimary,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = if (needsPermissions)
+                                    "Enable essential permissions so ZeroPro can safeguard your phone in real time."
+                                else
+                                    "All security engines are active with full permissions. Your device is safe.",
+                                color = TextSecondary,
+                                fontSize = 12.sp,
+                                lineHeight = 16.sp
+                            )
+                        }
+                    }
+
+                    if (needsPermissions) {
+                        Spacer(modifier = Modifier.height(14.dp))
+                        HorizontalDivider(color = BorderSubtle)
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            // 1. Accessibility for Pre-Install APK Blocker
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(SurfaceElevated, RoundedCornerShape(12.dp))
+                                    .border(1.dp, BorderSubtle, RoundedCornerShape(12.dp))
+                                    .padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .background(
+                                            if (isAccessibilityActive) ForestMintBadgeBg else DangerBg,
+                                            RoundedCornerShape(10.dp)
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Bolt,
+                                        contentDescription = null,
+                                        tint = if (isAccessibilityActive) ForestGreenPrimary else DangerSoft,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Pre-Install APK Blocker",
+                                        color = TextPrimary,
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 13.sp
+                                    )
+                                    Text(
+                                        text = if (isAccessibilityActive) "Active • Blocks unauthorized APKs" else "Needed to block stealth APK malware",
+                                        color = TextSecondary,
+                                        fontSize = 11.sp
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                if (isAccessibilityActive) {
+                                    Surface(
+                                        color = ForestMintBadgeBg,
+                                        shape = RoundedCornerShape(8.dp)
+                                    ) {
+                                        Text(
+                                            text = "ACTIVE",
+                                            color = ForestGreenPrimary,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 11.sp,
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                        )
+                                    }
+                                } else {
+                                    Button(
+                                        onClick = {
+                                            pendingDisclosure = ProminentDisclosureType.ACCESSIBILITY
+                                        },
+                                        colors = ButtonDefaults.buttonColors(containerColor = ForestGreenPrimary),
+                                        shape = RoundedCornerShape(10.dp),
+                                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                                        modifier = Modifier.height(34.dp)
+                                    ) {
+                                        Text(
+                                            text = "ENABLE",
+                                            color = Color.White,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 11.5.sp
+                                        )
+                                    }
+                                }
+                            }
+
+                            // 2. Notification Guard for WhatsApp & SMS Link Scanner
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(SurfaceElevated, RoundedCornerShape(12.dp))
+                                    .border(1.dp, BorderSubtle, RoundedCornerShape(12.dp))
+                                    .padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .background(
+                                            if (isNotificationGuardActive) ForestMintBadgeBg else DangerBg,
+                                            RoundedCornerShape(10.dp)
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Chat,
+                                        contentDescription = null,
+                                        tint = if (isNotificationGuardActive) ForestGreenPrimary else DangerSoft,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Chat & SMS Scam Link Guard",
+                                        color = TextPrimary,
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 13.sp
+                                    )
+                                    Text(
+                                        text = if (isNotificationGuardActive) "Active • Scans WhatsApp & SMS links" else "Needed to detect phishing & fraud links",
+                                        color = TextSecondary,
+                                        fontSize = 11.sp
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                if (isNotificationGuardActive) {
+                                    Surface(
+                                        color = ForestMintBadgeBg,
+                                        shape = RoundedCornerShape(8.dp)
+                                    ) {
+                                        Text(
+                                            text = "ACTIVE",
+                                            color = ForestGreenPrimary,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 11.sp,
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                        )
+                                    }
+                                } else {
+                                    Button(
+                                        onClick = {
+                                            pendingDisclosure = ProminentDisclosureType.NOTIFICATION_LISTENER
+                                        },
+                                        colors = ButtonDefaults.buttonColors(containerColor = ForestGreenPrimary),
+                                        shape = RoundedCornerShape(10.dp),
+                                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                                        modifier = Modifier.height(34.dp)
+                                    ) {
+                                        Text(
+                                            text = "ENABLE",
+                                            color = Color.White,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 11.5.sp
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = ForestGreenPrimary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = "Pre-Install APK Blocker & Scam Link Guard are active.",
+                                color = ForestGreenPrimary,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // 3. Daily Feature: "Safe for Banking & UPI" Live Readiness Check + OTP Clipboard Scrubber
         item {
             var bankingScanTrigger by remember { mutableIntStateOf(0) }
             var isCheckingBanking by remember { mutableStateOf(false) }
