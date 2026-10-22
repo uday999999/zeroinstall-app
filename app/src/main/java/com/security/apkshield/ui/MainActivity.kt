@@ -92,34 +92,43 @@ data class ShieldPalette(
     val isLight: Boolean
 )
 
-// Green Black Grey Executive Security Palette
-private val GreenBlackGreyYellowPalette = ShieldPalette(
-    bgDeepSlate = Color(0xFF0B0F19),      // Midnight Onyx Canvas
-    surfaceCard = Color(0xFF111827),      // Deep Charcoal Slate Cards
-    surfaceElevated = Color(0xFF161F30),  // Dark Slate Elevated Container
-    borderSubtle = Color(0xFF263246),     // Subtle Sleek Border
-    emeraldPrimary = Color(0xFF10B981),   // Bright Security Green (Active / Safe / Protected)
-    emeraldSoft = Color(0xFF10B981),      // Bright Security Green
-    emeraldDark = Color(0xFF162820),      // Dark Green Pill Container
-    cyanPrimary = Color(0xFF10B981),      // Security Green Accent
-    cyanSoft = Color(0xFF34D399),         // Mint Green Accent
-    cyanDark = Color(0xFF162820),         // Dark Green Container
-    textPrimary = Color(0xFFFFFFFF),      // Pure White High-Contrast Typography
-    textSecondary = Color(0xFF9CA3AF),    // Cool Silver-Grey Description Text
+// Chess App Luxury Palette Constants (#F0E8D5, #0B3817, #CDB382, #070D09)
+private val ChessIvoryCream = Color(0xFFF0E8D5)    // Board Light Square Ivory Cream
+private val ChessForestGreen = Color(0xFF0B3817)   // Board Dark Square Forest Green
+private val ChessGoldTrim = Color(0xFFCDB382)      // Board Border & Coordinate Gold
+private val ChessMidnightOnyx = Color(0xFF070D09)  // Deep Midnight Forest Onyx Canvas
+private val ChessCardBg = Color(0xFF0C1810)        // Deep Tournament Forest Slate Cards
+private val ChessCardElevated = Color(0xFF112317)  // Forest Elevated Container
+private val ChessCardBorder = Color(0xFF1D3623)    // Chess Board Subtle Border
+
+// Chess Grandmaster Security Palette (from Chess App theme)
+private val ChessGrandmasterPalette = ShieldPalette(
+    bgDeepSlate = ChessMidnightOnyx,      // Midnight Forest Canvas
+    surfaceCard = ChessCardBg,            // Deep Forest Slate Cards
+    surfaceElevated = ChessCardElevated,  // Forest Elevated Container
+    borderSubtle = ChessCardBorder,       // Chess Board Subtle Border
+    emeraldPrimary = ChessGoldTrim,       // Antique Gold Active Accent
+    emeraldSoft = ChessIvoryCream,        // Warm Ivory Cream
+    emeraldDark = ChessForestGreen,       // Dark Forest Green Container
+    cyanPrimary = ChessGoldTrim,          // Antique Gold Accent
+    cyanSoft = ChessIvoryCream,           // Warm Ivory Accent
+    cyanDark = ChessForestGreen,          // Dark Green Container
+    textPrimary = Color(0xFFF7F4EB),      // Warm Ivory Typography
+    textSecondary = Color(0xFF8FA093),    // Soft Parchment Description Text
     dangerSoft = Color(0xFFEF4444),       // Vivid Alert Red
     dangerBg = Color(0xFF2D1217),         // Dark Alert Container
-    proGold = Color(0xFF10B981),          // Security Green Accent (Buttons, PRO badge)
-    proGoldSoft = Color(0xFF34D399),      // Bright Green Accent
-    proGoldDark = Color(0xFF162820),      // Dark Green Pill Background
-    proCardBg = Color(0xFF111827),        // Deep Slate Card
-    proBorder = Color(0xFF263246),        // Sleek Border
+    proGold = ChessGoldTrim,              // Antique Gold Accent
+    proGoldSoft = ChessIvoryCream,        // Ivory Cream Accent
+    proGoldDark = ChessForestGreen,       // Forest Green Container
+    proCardBg = ChessCardBg,              // Forest Card
+    proBorder = ChessGoldTrim,            // Gold Border
     isLight = false
 )
 
-private val FreeDarkPalette = GreenBlackGreyYellowPalette
-private val ProLightPalette = GreenBlackGreyYellowPalette
+private val FreeDarkPalette = ChessGrandmasterPalette
+private val ProLightPalette = ChessGrandmasterPalette
 
-private val LocalShieldPalette = staticCompositionLocalOf { GreenBlackGreyYellowPalette }
+private val LocalShieldPalette = staticCompositionLocalOf { ChessGrandmasterPalette }
 
 private val BgDeepSlate: Color @Composable get() = LocalShieldPalette.current.bgDeepSlate
 private val SurfaceCard: Color @Composable get() = LocalShieldPalette.current.surfaceCard
@@ -150,7 +159,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val isProUnlocked by ShieldRepository.isProUnlocked.collectAsState()
-            val palette = GreenBlackGreyYellowPalette
+            val palette = ChessGrandmasterPalette
 
             val view = LocalView.current
             if (!view.isInEditMode) {
@@ -276,13 +285,14 @@ fun ApkShieldMainApp() {
                             Box(
                                 modifier = Modifier
                                     .size(36.dp)
-                                    .background(Color(0xFFFACC15), RoundedCornerShape(10.dp)),
+                                    .background(ChessIvoryCream, RoundedCornerShape(10.dp))
+                                    .border(1.dp, ChessGoldTrim, RoundedCornerShape(10.dp)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Shield,
                                     contentDescription = null,
-                                    tint = Color(0xFF0B0F19),
+                                    tint = ChessForestGreen,
                                     modifier = Modifier.size(19.dp)
                                 )
                             }
@@ -297,17 +307,18 @@ fun ApkShieldMainApp() {
                                 Text(
                                     text = "by ZeroInstall",
                                     fontSize = 11.sp,
-                                    color = Color(0xFF10B981),
+                                    color = ChessGoldTrim,
                                     fontWeight = FontWeight.SemiBold
                                 )
                             }
                         }
 
-                        // Pro Badge: Shield Logo + PRO in bold letters (Yellow Background)
+                        // Pro Badge: Shield Logo + PRO in bold letters (Chess Ivory Cream & Forest Green)
                         Surface(
-                            color = Color(0xFFFACC15),
+                            color = ChessIvoryCream,
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier
+                                .border(1.dp, ChessGoldTrim, RoundedCornerShape(8.dp))
                                 .clickable { showProModal = true }
                         ) {
                             Row(
@@ -317,13 +328,13 @@ fun ApkShieldMainApp() {
                                 Icon(
                                     imageVector = Icons.Default.Shield,
                                     contentDescription = null,
-                                    tint = Color(0xFF0B0F19),
+                                    tint = ChessForestGreen,
                                     modifier = Modifier.size(15.dp)
                                 )
                                 Spacer(modifier = Modifier.width(5.dp))
                                 Text(
                                     text = "PRO",
-                                    color = Color(0xFF0B0F19),
+                                    color = ChessForestGreen,
                                     fontSize = 12.5.sp,
                                     fontWeight = FontWeight.Black
                                 )
@@ -334,10 +345,10 @@ fun ApkShieldMainApp() {
             }
         },
         bottomBar = {
-            val activeNavTint = Color(0xFF10B981)
-            val activeNavIndicator = Color(0xFF162820)
+            val activeNavTint = ChessGoldTrim
+            val activeNavIndicator = ChessForestGreen
             NavigationBar(
-                containerColor = SurfaceCard,
+                containerColor = ChessMidnightOnyx,
                 tonalElevation = 0.dp
             ) {
                 NavigationBarItem(
@@ -373,8 +384,8 @@ fun ApkShieldMainApp() {
                         BadgedBox(
                             badge = {
                                 if (!isProUnlocked) {
-                                    Badge(containerColor = Color(0xFFFACC15)) {
-                                        Text("PRO", color = Color(0xFF0B0F19), fontSize = 8.sp, fontWeight = FontWeight.ExtraBold)
+                                    Badge(containerColor = ChessIvoryCream) {
+                                        Text("PRO", color = ChessForestGreen, fontSize = 8.sp, fontWeight = FontWeight.ExtraBold)
                                     }
                                 }
                             }
@@ -647,21 +658,21 @@ fun ZeroInstallProDialog(
             ) {
                 Spacer(modifier = Modifier.height(6.dp))
 
-                // Emblem (Yellow Circle with Black Shield)
+                // Emblem (Chess Ivory Cream with Gold Trim & Forest Green Shield)
                 Box(
                     modifier = Modifier
                         .size(46.dp)
                         .background(
-                            Color(0xFFFACC15),
+                            ChessIvoryCream,
                             CircleShape
                         )
-                        .border(1.5.dp, Color(0xFFFACC15), CircleShape),
+                        .border(1.5.dp, ChessGoldTrim, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Shield,
                         contentDescription = null,
-                        tint = Color(0xFF0B0F19),
+                        tint = ChessForestGreen,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -1013,7 +1024,7 @@ fun ShieldDashboardTab(
                         Brush.verticalGradient(
                             colors = when {
                                 !blockAllApk -> listOf(DangerBg, SurfaceCard)
-                                else -> listOf(Color(0xFF161F30), SurfaceCard)
+                                else -> listOf(ChessCardElevated, ChessCardBg)
                             }
                         ),
                         RoundedCornerShape(16.dp)
@@ -1022,7 +1033,7 @@ fun ShieldDashboardTab(
                         width = 1.dp,
                         color = when {
                             !blockAllApk -> DangerSoft.copy(alpha = 0.5f)
-                            else -> Color(0xFF10B981).copy(alpha = 0.45f)
+                            else -> ChessGoldTrim.copy(alpha = 0.45f)
                         },
                         shape = RoundedCornerShape(16.dp)
                     )
@@ -1035,11 +1046,11 @@ fun ShieldDashboardTab(
                 ) {
                     // Status Pill with Live Pulse Dot
                     Surface(
-                        color = Color(0xFF162820),
+                        color = ChessForestGreen,
                         shape = RoundedCornerShape(20.dp),
                         modifier = Modifier
                             .padding(bottom = 16.dp)
-                            .border(1.dp, Color(0xFF10B981).copy(alpha = 0.35f), RoundedCornerShape(20.dp))
+                            .border(1.dp, ChessGoldTrim.copy(alpha = 0.45f), RoundedCornerShape(20.dp))
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
@@ -1048,12 +1059,12 @@ fun ShieldDashboardTab(
                             Box(
                                 modifier = Modifier
                                     .size(7.dp)
-                                    .background(if (blockAllApk) Color(0xFF10B981) else DangerSoft, CircleShape)
+                                    .background(if (blockAllApk) ChessGoldTrim else DangerSoft, CircleShape)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = if (isProUnlocked) "24/7 PRO ENDPOINT PROTECTION" else "STANDARD PROTECTION ACTIVE",
-                                color = if (blockAllApk) Color(0xFF10B981) else DangerSoft,
+                                color = if (blockAllApk) ChessIvoryCream else DangerSoft,
                                 fontSize = 10.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 0.5.sp
@@ -1061,14 +1072,14 @@ fun ShieldDashboardTab(
                         }
                     }
 
-                    // Defender Shield Emblem
+                    // Defender Shield Emblem (Chess Ivory Cream & Forest Green)
                     Box(
                         modifier = Modifier
                             .size(if (isProUnlocked) 72.dp else 68.dp)
                             .background(
                                 when {
                                     !blockAllApk -> DangerBg
-                                    else -> Color(0xFFFACC15)
+                                    else -> ChessIvoryCream
                                 },
                                 CircleShape
                             )
@@ -1076,7 +1087,7 @@ fun ShieldDashboardTab(
                                 width = 2.dp,
                                 color = when {
                                     !blockAllApk -> DangerSoft
-                                    else -> Color(0xFFFACC15)
+                                    else -> ChessGoldTrim
                                 },
                                 shape = CircleShape
                             ),
@@ -1084,7 +1095,7 @@ fun ShieldDashboardTab(
                     ) {
                         if (isQuickScanning) {
                             CircularProgressIndicator(
-                                color = Color(0xFF0B0F19),
+                                color = ChessForestGreen,
                                 strokeWidth = 3.dp,
                                 modifier = Modifier.size(40.dp)
                             )
@@ -1097,7 +1108,7 @@ fun ShieldDashboardTab(
                                 contentDescription = null,
                                 tint = when {
                                     !blockAllApk -> DangerSoft
-                                    else -> Color(0xFF0B0F19)
+                                    else -> ChessForestGreen
                                 },
                                 modifier = Modifier.size(36.dp)
                             )
@@ -1114,7 +1125,7 @@ fun ShieldDashboardTab(
                             blockAllApk -> "Your Phone is Protected"
                             else -> "Protection Paused"
                         },
-                        color = if (blockAllApk) Color(0xFF10B981) else DangerSoft,
+                        color = if (blockAllApk) ChessIvoryCream else DangerSoft,
                         fontWeight = FontWeight.Bold,
                         fontSize = 19.sp,
                         textAlign = TextAlign.Center
@@ -1697,15 +1708,15 @@ fun DataExfiltrationMonitorTab(
                     Spacer(modifier = Modifier.height(20.dp))
                     Button(
                         onClick = onOpenPro,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFACC15)),
+                        colors = ButtonDefaults.buttonColors(containerColor = ChessIvoryCream),
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFF0B0F19))
+                        Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = ChessForestGreen)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "Unlock 24/7 Data Guard",
-                            color = Color(0xFF0B0F19),
+                            color = ChessForestGreen,
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp
                         )
@@ -2655,13 +2666,13 @@ private fun EnginePermissionCard(
                     if (isProFeature && !isProUnlocked) {
                         Spacer(modifier = Modifier.width(6.dp))
                         Surface(
-                            color = Color(0xFFFACC15),
+                            color = ChessIvoryCream,
                             shape = RoundedCornerShape(50),
-                            modifier = Modifier.border(1.dp, Color(0xFFFACC15), RoundedCornerShape(50))
+                            modifier = Modifier.border(1.dp, ChessGoldTrim, RoundedCornerShape(50))
                         ) {
                             Text(
                                 text = "PRO",
-                                color = Color(0xFF0B0F19),
+                                color = ChessForestGreen,
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
