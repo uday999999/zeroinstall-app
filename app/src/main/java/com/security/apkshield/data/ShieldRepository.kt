@@ -19,6 +19,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.json.JSONArray
 import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.UUID
 
 object ShieldRepository {
@@ -37,6 +40,8 @@ object ShieldRepository {
     private const val KEY_ADS_WATCHED_COUNT = "zeroinstall_ads_watched_count"
 
     private const val KEY_FIRST_RUN_PRO_INITIALIZED = "zeroinstall_first_run_pro_initialized"
+    private const val KEY_FIRST_LAUNCH_WELCOME_SHOWN = "zeroinstall_first_launch_welcome_shown"
+    private const val KEY_LAST_EXPIRATION_PROMPT_DATE = "zeroinstall_last_expiration_prompt_date"
 
     private const val ALERT_CHANNEL_ID = "apk_shield_critical_alerts"
 
@@ -150,6 +155,33 @@ object ShieldRepository {
             val secLabel = if (seconds == 1L) "1 Sec" else "$seconds Secs"
             "$hourLabel $minLabel $secLabel"
         }
+    }
+
+    fun isFirstLaunchWelcomeShown(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_FIRST_LAUNCH_WELCOME_SHOWN, false)
+
+    fun setFirstLaunchWelcomeShown(context: Context) {
+        prefs(context).edit().putBoolean(KEY_FIRST_LAUNCH_WELCOME_SHOWN, true).apply()
+    }
+
+    fun shouldShowTrialExpiredPrompt(context: Context): Boolean {
+        val p = prefs(context)
+        val isFirstLaunchShown = p.getBoolean(KEY_FIRST_LAUNCH_WELCOME_SHOWN, false)
+        if (!isFirstLaunchShown) return false
+        val isPro = _isProUnlocked.value
+        if (isPro) return false
+        val expiry = p.getLong(KEY_PRO_AD_EXPIRY_MS, 0L)
+        if (expiry > 0L && System.currentTimeMillis() >= expiry) {
+            val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+            val lastPrompt = p.getString(KEY_LAST_EXPIRATION_PROMPT_DATE, "")
+            return lastPrompt != today
+        }
+        return false
+    }
+
+    fun markTrialExpiredPromptShown(context: Context) {
+        val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        prefs(context).edit().putString(KEY_LAST_EXPIRATION_PROMPT_DATE, today).apply()
     }
 
     /**

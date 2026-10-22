@@ -17,6 +17,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.animation.core.*
+import androidx.compose.ui.draw.scale
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -206,6 +208,9 @@ fun ApkShieldMainApp() {
     val context = LocalContext.current
     var selectedTab by remember { mutableIntStateOf(0) }
     var showProModal by remember { mutableStateOf(false) }
+    var showWelcomeDialog by remember { mutableStateOf(!ShieldRepository.isFirstLaunchWelcomeShown(context)) }
+    var showTrialExpiredDialog by remember { mutableStateOf(false) }
+
     val threatEvents by ShieldRepository.threatEvents.collectAsState()
     val blockedTrackers by ShieldRepository.blockedTrackersCount.collectAsState()
     val isProUnlocked by ShieldRepository.isProUnlocked.collectAsState()
@@ -238,6 +243,31 @@ fun ApkShieldMainApp() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             notifPermLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
+        if (ShieldRepository.shouldShowTrialExpiredPrompt(context)) {
+            showTrialExpiredDialog = true
+            ShieldRepository.markTrialExpiredPromptShown(context)
+        }
+    }
+
+    if (showWelcomeDialog) {
+        ZeroInstallWelcomeDialog(
+            onDismiss = {
+                ShieldRepository.setFirstLaunchWelcomeShown(context)
+                showWelcomeDialog = false
+            }
+        )
+    }
+
+    if (showTrialExpiredDialog && !showWelcomeDialog && !showProModal) {
+        ZeroInstallTrialExpiredDialog(
+            onWatchAd = {
+                showTrialExpiredDialog = false
+                showProModal = true
+            },
+            onDismiss = {
+                showTrialExpiredDialog = false
+            }
+        )
     }
 
     if (showProModal) {
@@ -883,6 +913,78 @@ fun ZeroInstallProDialog(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
+                // 4. Basic Edition (Free Forever • Core Protection • No Ads Required)
+                Surface(
+                    color = SurfaceElevated,
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(14.dp))
+                        .clickable { onDismiss() }
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Shield,
+                                contentDescription = null,
+                                tint = ForestGreenPrimary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = "Basic Edition",
+                                        color = TextPrimary,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 14.sp
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Surface(
+                                        color = ForestMintBadgeBg,
+                                        shape = RoundedCornerShape(50),
+                                        modifier = Modifier.border(1.dp, ForestMintBadgeBorder, RoundedCornerShape(50))
+                                    ) {
+                                        Text(
+                                            "ALWAYS FREE",
+                                            color = ForestGreenPrimary,
+                                            fontSize = 9.sp,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp)
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "Rogue APK blocker & core defense • No ads",
+                                    color = TextSecondary,
+                                    fontSize = 11.sp
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "FREE",
+                            color = TextPrimary,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.5.sp,
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
                 TextButton(onClick = onDismiss) {
                     Text("Close", color = TextSecondary, fontSize = 12.sp)
                 }
@@ -914,6 +1016,328 @@ private fun ProFeatureItem(text: String) {
             lineHeight = 18.sp
         )
     }
+}
+
+@Composable
+fun ZeroInstallWelcomeDialog(
+    onDismiss: () -> Unit
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "welcome_shield_pulse")
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 0.95f,
+        targetValue = 1.05f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "welcome_shield_scale"
+    )
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = SurfaceCard,
+        shape = RoundedCornerShape(24.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp)
+            .border(1.dp, BorderSubtle, RoundedCornerShape(24.dp)),
+        title = null,
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Pulsing Grok Shield Animation
+                Box(
+                    modifier = Modifier.size(130.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.grok_shield_hero),
+                        contentDescription = "Welcome Shield",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .scale(scale),
+                        contentScale = ContentScale.Fit
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Welcome to ZeroPro Guard",
+                    color = TextPrimary,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 20.sp,
+                    letterSpacing = (-0.3).sp,
+                    textAlign = TextAlign.Center
+                )
+
+                Text(
+                    text = "Smart Protection. Zero Compromise.",
+                    color = TextSecondary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                // 3 Days Gift Pill Box
+                Surface(
+                    color = ForestMintBadgeBg,
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, ForestMintBadgeBorder, RoundedCornerShape(14.dp))
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 14.dp, vertical = 10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "🎁 3 Days of Enterprise Pro Unlocked Free",
+                            color = ForestGreenPrimary,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(3.dp))
+                        Text(
+                            text = "All 9 security engines are active to safeguard your banking, apps & links.",
+                            color = ForestGreenPrimary.copy(alpha = 0.85f),
+                            fontSize = 11.sp,
+                            textAlign = TextAlign.Center,
+                            lineHeight = 15.sp
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                // Model description stack
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Surface(
+                        color = SurfaceElevated,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .border(1.dp, BorderSubtle, RoundedCornerShape(12.dp))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = "⭐", fontSize = 16.sp)
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Text(
+                                    text = "Pro Protection (Free with 1 Ad/Day)",
+                                    color = TextPrimary,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.5.sp
+                                )
+                                Text(
+                                    text = "WhatsApp/SMS link scanner, tracker firewall & data leak monitor. Free forever by watching 1 ad/day (or subscribe).",
+                                    color = TextSecondary,
+                                    fontSize = 11.sp,
+                                    lineHeight = 15.sp
+                                )
+                            }
+                        }
+                    }
+
+                    Surface(
+                        color = SurfaceElevated,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .border(1.dp, BorderSubtle, RoundedCornerShape(12.dp))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = "🛡️", fontSize = 16.sp)
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Text(
+                                    text = "Basic Protection (Always Free)",
+                                    color = TextPrimary,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.5.sp
+                                )
+                                Text(
+                                    text = "Blocks unauthorized background APK installs & detects rogue apps. 100% free with zero ads required.",
+                                    color = TextSecondary,
+                                    fontSize = 11.sp,
+                                    lineHeight = 15.sp
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+                // CTA Button
+                Button(
+                    onClick = onDismiss,
+                    colors = ButtonDefaults.buttonColors(containerColor = ForestGreenPrimary),
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(46.dp)
+                ) {
+                    Text(
+                        text = "START WITH 3 DAYS FREE PRO",
+                        color = Color.White,
+                        fontWeight = FontWeight.Black,
+                        fontSize = 12.5.sp,
+                        letterSpacing = 0.5.sp
+                    )
+                }
+            }
+        },
+        confirmButton = {}
+    )
+}
+
+@Composable
+fun ZeroInstallTrialExpiredDialog(
+    onWatchAd: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = SurfaceCard,
+        shape = RoundedCornerShape(24.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp)
+            .border(1.dp, BorderSubtle, RoundedCornerShape(24.dp)),
+        title = null,
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Box(
+                    modifier = Modifier
+                        .size(52.dp)
+                        .background(ForestMintBadgeBg, CircleShape)
+                        .border(1.5.dp, ForestMintBadgeBorder, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Shield,
+                        contentDescription = null,
+                        tint = ForestGreenPrimary,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "3-Day Pro Trial Completed",
+                    color = TextPrimary,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 18.sp,
+                    letterSpacing = (-0.3).sp,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "Your phone is still protected by Basic Shield.",
+                    color = TextSecondary,
+                    fontSize = 12.5.sp,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Surface(
+                    color = SurfaceElevated,
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(14.dp))
+                ) {
+                    Column(modifier = Modifier.padding(14.dp)) {
+                        Text(
+                            text = "Want to keep advanced protection?",
+                            color = TextPrimary,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Watch 1 quick video ad to get 24 hours of Pro protection free, or choose a monthly/annual pass.",
+                            color = TextSecondary,
+                            fontSize = 11.5.sp,
+                            lineHeight = 16.sp
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = onWatchAd,
+                    colors = ButtonDefaults.buttonColors(containerColor = ForestGreenPrimary),
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(46.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.PlayCircleFilled,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "WATCH 1 AD (+24H PRO FREE)",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp,
+                            letterSpacing = 0.5.sp
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                TextButton(onClick = onDismiss) {
+                    Text(
+                        text = "Continue on Free Basic Shield",
+                        color = TextSecondary,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        },
+        confirmButton = {}
+    )
 }
 
 @Composable
