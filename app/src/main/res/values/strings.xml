@@ -1,8 +1,8 @@
 <resources>
-    <string name="app_name">ZeroInstall Shield</string>
-    <string name="accessibility_service_label">ZeroInstall APK Blocker</string>
+    <string name="app_name">ZeroPro</string>
+    <string name="accessibility_service_label">ZeroPro APK Blocker</string>
     <string name="accessibility_service_description">Monitors and automatically blocks unauthorized APK installations, silent background install prompts, and "Install Unknown Apps" permission bypass attempts.</string>
-    <string name="notification_listener_label">ZeroInstall Link &amp; Message Guard</string>
-    <string name="device_admin_label">ZeroInstall Tamper &amp; Policy Guard</string>
-    <string name="device_admin_description">Prevents malware from uninstalling ZeroInstall Shield and enforces OS-level restrictions against unknown APK sources.</string>
+    <string name="notification_listener_label">ZeroPro Link &amp; Message Guard</string>
+    <string name="device_admin_label">ZeroPro Tamper &amp; Policy Guard</string>
+    <string name="device_admin_description">Prevents malware from uninstalling ZeroPro and enforces OS-level restrictions against unknown APK sources.</string>
 </resources>

@@ -18,7 +18,7 @@ enum class ProminentDisclosureType(
         permissionBadge = "Real-Time Install Shield",
         whatIsAccessed = "Detects when an unauthorized APK installer prompt or 'Install Unknown Apps' screen opens.",
         howItIsUsed = "Used in real time to warn you and block unauthorized sideloaded app installations before they can harm your phone.",
-        privacyGuarantee = "100% On-Device Privacy: ZeroInstall Shield never reads personal messages, passwords, or banking inputs, and never sends screen data off your device."
+        privacyGuarantee = "100% On-Device Privacy: ZeroPro never reads personal messages, passwords, or banking inputs, and never sends screen data off your device."
     ),
     NOTIFICATION_LISTENER(
         title = "Enable Message Link Guard",
@@ -45,8 +45,8 @@ enum class ProminentDisclosureType(
         title = "Enable Anti-Tamper Protection",
         permissionBadge = "Uninstall Lock",
         whatIsAccessed = "Uses Android Device Administrator protection.",
-        howItIsUsed = "Prevents malware or an intruder from silently uninstalling ZeroInstall Shield in the background.",
-        privacyGuarantee = "You can turn this off at any time from inside ZeroInstall Shield."
+        howItIsUsed = "Prevents malware or an intruder from silently uninstalling ZeroPro in the background.",
+        privacyGuarantee = "You can turn this off at any time from inside ZeroPro."
     )
 }
 
@@ -62,10 +62,10 @@ data class RegionalPlanPrice(
 object RegionalPricingManager {
 
     private val REGIONAL_TIERS = mapOf(
-        "IN" to RegionalPlanPrice("IN", "India", "₹", "₹49 / month", "₹299 / year", "Save 50% with Annual Plan"),
-        "US" to RegionalPlanPrice("US", "United States", "$", "$1.99 / month", "$14.99 / year", "Save 37% with Annual Plan"),
-        "GB" to RegionalPlanPrice("GB", "United Kingdom", "£", "£1.49 / month", "£11.99 / year", "Save 33% with Annual Plan"),
-        "DE" to RegionalPlanPrice("DE", "Europe", "€", "€1.79 / month", "€12.99 / year", "Save 40% with Annual Plan")
+        "IN" to RegionalPlanPrice("IN", "India", "₹", "₹99 / month", "₹999 / year", "Save with Annual Plan"),
+        "US" to RegionalPlanPrice("US", "United States", "$", "$2.99 / month", "$24.99 / year", "Save 30% with Annual Plan"),
+        "GB" to RegionalPlanPrice("GB", "United Kingdom", "£", "£2.49 / month", "£19.99 / year", "Save 33% with Annual Plan"),
+        "DE" to RegionalPlanPrice("DE", "Europe", "€", "€2.79 / month", "€22.99 / year", "Save 31% with Annual Plan")
     )
 
     fun getCurrentUserRegionalPrice(): RegionalPlanPrice {
@@ -74,8 +74,8 @@ object RegionalPricingManager {
             countryCode = code.ifEmpty { "IN" },
             countryName = Locale.getDefault().displayCountry.ifEmpty { "Standard" },
             currencySymbol = "₹",
-            monthlyPriceFormatted = "₹49 / month",
-            yearlyPriceFormatted = "₹299 / year",
+            monthlyPriceFormatted = "₹99 / month",
+            yearlyPriceFormatted = "₹999 / year",
             pppDiscountNote = "Cancel anytime via Google Play"
         )
     }
@@ -168,4 +168,103 @@ object PeopleProtectionTools {
             )
         }
     }
+
+    fun runBankingUpiSafetyCheck(context: Context): BankingUpiSafetyReport {
+        val remoteApps = detectRemoteAccessScamApps(context)
+        val wifiReport = auditNetworkProxySafety(context)
+
+        val isUsbDebuggingOn = try {
+            android.provider.Settings.Global.getInt(
+                context.contentResolver,
+                android.provider.Settings.Global.ADB_ENABLED,
+                0
+            ) == 1
+        } catch (_: Exception) {
+            false
+        }
+
+        val unknownAccessibilityApps = mutableListOf<String>()
+        try {
+            val enabledServices = android.provider.Settings.Secure.getString(
+                context.contentResolver,
+                android.provider.Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+            ) ?: ""
+            if (enabledServices.isNotBlank()) {
+                val entries = enabledServices.split(":")
+                for (entry in entries) {
+                    val pkg = entry.substringBefore("/").trim()
+                    if (pkg.isNotEmpty() &&
+                        pkg != context.packageName &&
+                        !pkg.startsWith("com.google.") &&
+                        !pkg.startsWith("com.android.") &&
+                        !pkg.startsWith("com.samsung.") &&
+                        !pkg.startsWith("com.sec.")
+                    ) {
+                        unknownAccessibilityApps.add(pkg)
+                    }
+                }
+            }
+        } catch (_: Exception) {
+        }
+
+        val allSafe = remoteApps.isEmpty() &&
+            !wifiReport.isProxyDetected &&
+            !isUsbDebuggingOn &&
+            unknownAccessibilityApps.isEmpty()
+
+        return BankingUpiSafetyReport(
+            isAllSafe = allSafe,
+            screenShareSafe = remoteApps.isEmpty(),
+            screenShareDetail = if (remoteApps.isEmpty()) {
+                "No screen-sharing apps (AnyDesk / TeamViewer) installed"
+            } else {
+                "Found: ${remoteApps.joinToString { it.appName }}"
+            },
+            networkSafe = !wifiReport.isProxyDetected,
+            networkDetail = if (!wifiReport.isProxyDetected) {
+                "No hidden Wi-Fi proxy or traffic interception"
+            } else {
+                "Proxy active: ${wifiReport.proxyHostPort}"
+            },
+            usbDebuggingSafe = !isUsbDebuggingOn,
+            usbDebuggingDetail = if (!isUsbDebuggingOn) {
+                "USB / ADB Debugging is OFF"
+            } else {
+                "USB Debugging is ON in Developer Options"
+            },
+            screenOverlaySafe = unknownAccessibilityApps.isEmpty(),
+            screenOverlayDetail = if (unknownAccessibilityApps.isEmpty()) {
+                "No third-party screen readers watching OTPs"
+            } else {
+                "Active screen reader: ${unknownAccessibilityApps.joinToString()}"
+            }
+        )
+    }
+
+    fun scrubClipboard(context: Context): Boolean {
+        return try {
+            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                clipboard.clearPrimaryClip()
+            } else {
+                clipboard.setPrimaryClip(android.content.ClipData.newPlainText("", ""))
+            }
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
 }
+
+data class BankingUpiSafetyReport(
+    val isAllSafe: Boolean,
+    val screenShareSafe: Boolean,
+    val screenShareDetail: String,
+    val networkSafe: Boolean,
+    val networkDetail: String,
+    val usbDebuggingSafe: Boolean,
+    val usbDebuggingDetail: String,
+    val screenOverlaySafe: Boolean,
+    val screenOverlayDetail: String
+)
+

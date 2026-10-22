@@ -175,6 +175,7 @@ class ContinuousShieldMonitorService : Service() {
     }
 
     private fun inspectDownloadedFile(file: File) {
+        if (!ShieldRepository.isBlockAllApkEnabled(applicationContext)) return
         if (!file.exists() || !file.isFile) return
         val nameLower = file.name.lowercase(Locale.ROOT)
 

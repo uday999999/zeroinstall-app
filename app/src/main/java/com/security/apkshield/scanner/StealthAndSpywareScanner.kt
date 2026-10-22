@@ -226,4 +226,94 @@ object StealthAndSpywareScanner {
             null
         }
     }
+
+    data class ApkArchiveAnalysis(
+        val fileName: String,
+        val packageName: String,
+        val versionName: String,
+        val abilities: List<String>,
+        val hasHighRiskSpyCapabilities: Boolean
+    )
+
+    private val APK_ARCHIVE_ABILITY_LABELS = linkedMapOf(
+        "android.permission.READ_SMS" to "Read SMS & Banking OTPs",
+        "android.permission.RECEIVE_SMS" to "Intercept Incoming SMS",
+        "android.permission.SEND_SMS" to "Send SMS Messages",
+        "android.permission.BIND_ACCESSIBILITY_SERVICE" to "Full Screen Control (Accessibility)",
+        "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" to "Read All Notifications & Messages",
+        "android.permission.BIND_DEVICE_ADMIN" to "Device Admin (Hard to Uninstall)",
+        "android.permission.RECORD_AUDIO" to "Record Microphone Audio",
+        "android.permission.CAMERA" to "Take Photos & Videos (Camera)",
+        "android.permission.READ_CONTACTS" to "Read Your Contacts List",
+        "android.permission.READ_CALL_LOG" to "Read Call History",
+        "android.permission.ACCESS_FINE_LOCATION" to "Track Precise GPS Location",
+        "android.permission.ACCESS_BACKGROUND_LOCATION" to "24/7 Background Location Tracking",
+        "android.permission.SYSTEM_ALERT_WINDOW" to "Draw Over Other Apps (Screen Overlay)",
+        "android.permission.REQUEST_INSTALL_PACKAGES" to "Install Other APK Files",
+        "android.permission.READ_MEDIA_IMAGES" to "Access Photos & Media",
+        "android.permission.READ_EXTERNAL_STORAGE" to "Read Device Files & Storage",
+        "android.permission.PACKAGE_USAGE_STATS" to "Monitor App Usage History",
+        "android.permission.RECEIVE_BOOT_COMPLETED" to "Auto-Start in Background on Boot"
+    )
+
+    /**
+     * Inspects an un-installed .apk file (either by direct path or the newest .apk in Downloads)
+     * using PackageManager.getPackageArchiveInfo to show the user every ability/permission
+     * inside the APK BEFORE they decide to Go Back or Take the Risk.
+     */
+    fun inspectApkArchiveAbilities(context: Context, explicitPath: String? = null): ApkArchiveAnalysis? {
+        val pm = context.packageManager
+        val targetFile: java.io.File = when {
+            !explicitPath.isNullOrBlank() && java.io.File(explicitPath).exists() -> java.io.File(explicitPath)
+            else -> {
+                val dlDir = android.os.Environment.getExternalStoragePublicDirectory(
+                    android.os.Environment.DIRECTORY_DOWNLOADS
+                )
+                dlDir.listFiles()
+                    ?.filter { it.isFile && it.name.lowercase().endsWith(".apk") }
+                    ?.maxByOrNull { it.lastModified() }
+            }
+        } ?: return null
+
+        return try {
+            val flags = PackageManager.GET_PERMISSIONS or PackageManager.GET_SERVICES or PackageManager.GET_RECEIVERS
+            val pkgInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                pm.getPackageArchiveInfo(targetFile.absolutePath, PackageManager.PackageInfoFlags.of(flags.toLong()))
+            } else {
+                @Suppress("DEPRECATION")
+                pm.getPackageArchiveInfo(targetFile.absolutePath, flags)
+            } ?: return null
+
+            val abilities = mutableListOf<String>()
+            pkgInfo.requestedPermissions?.forEach { perm ->
+                APK_ARCHIVE_ABILITY_LABELS[perm]?.let { label ->
+                    if (label !in abilities) abilities.add(label)
+                }
+            }
+            pkgInfo.services?.forEach { svc ->
+                APK_ARCHIVE_ABILITY_LABELS[svc.permission]?.let { label ->
+                    if (label !in abilities) abilities.add(label)
+                }
+            }
+            pkgInfo.receivers?.forEach { rcv ->
+                APK_ARCHIVE_ABILITY_LABELS[rcv.permission]?.let { label ->
+                    if (label !in abilities) abilities.add(label)
+                }
+            }
+
+            val highRisk = abilities.any {
+                it.contains("SMS") || it.contains("Screen Control") || it.contains("Notifications") || it.contains("Device Admin")
+            }
+
+            ApkArchiveAnalysis(
+                fileName = targetFile.name,
+                packageName = pkgInfo.packageName ?: "Unknown Package",
+                versionName = pkgInfo.versionName ?: "1.0",
+                abilities = abilities,
+                hasHighRiskSpyCapabilities = highRisk
+            )
+        } catch (_: Exception) {
+            null
+        }
+    }
 }

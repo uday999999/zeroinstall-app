@@ -33,6 +33,10 @@ object ShieldRepository {
     private const val KEY_PIN_CODE = "security_pin_code"
     private const val KEY_THREAT_LOGS = "threat_logs_json"
     private const val KEY_PRO_UNLOCKED = "zeroinstall_pro_unlocked"
+    private const val KEY_PRO_AD_EXPIRY_MS = "zeroinstall_pro_ad_expiry_ms"
+    private const val KEY_ADS_WATCHED_COUNT = "zeroinstall_ads_watched_count"
+
+    private const val KEY_FIRST_RUN_PRO_INITIALIZED = "zeroinstall_first_run_pro_initialized"
 
     private const val ALERT_CHANNEL_ID = "apk_shield_critical_alerts"
 
@@ -45,19 +49,124 @@ object ShieldRepository {
     private val _isProUnlocked = MutableStateFlow(false)
     val isProUnlocked: StateFlow<Boolean> = _isProUnlocked.asStateFlow()
 
+    private val _proAdExpiryMs = MutableStateFlow(0L)
+    val proAdExpiryMs: StateFlow<Long> = _proAdExpiryMs.asStateFlow()
+
+    private val _adsWatchedCount = MutableStateFlow(0)
+    val adsWatchedCount: StateFlow<Int> = _adsWatchedCount.asStateFlow()
+
+    @Volatile
+    private var temporaryBypassUntilMs: Long = 0L
+
     fun init(context: Context) {
         createNotificationChannel(context)
         loadLogs(context)
-        _isProUnlocked.value = prefs(context).getBoolean(KEY_PRO_UNLOCKED, false)
+        val p = prefs(context)
+
+        // Automatically give 3 days of Free Pro on first app launch
+        if (!p.getBoolean(KEY_FIRST_RUN_PRO_INITIALIZED, false)) {
+            val threeDaysMs = System.currentTimeMillis() + (3 * 24 * 3600_000L)
+            p.edit()
+                .putBoolean(KEY_FIRST_RUN_PRO_INITIALIZED, true)
+                .putLong(KEY_PRO_AD_EXPIRY_MS, threeDaysMs)
+                .apply()
+        }
+
+        val savedExpiry = p.getLong(KEY_PRO_AD_EXPIRY_MS, 0L)
+        val isPaidSub = p.getBoolean(KEY_PRO_UNLOCKED, false)
+        _proAdExpiryMs.value = savedExpiry
+        _adsWatchedCount.value = p.getInt(KEY_ADS_WATCHED_COUNT, 0)
+        _isProUnlocked.value = isPaidSub || (System.currentTimeMillis() < savedExpiry)
     }
 
     fun setProUnlocked(context: Context, unlocked: Boolean) {
-        prefs(context).edit().putBoolean(KEY_PRO_UNLOCKED, unlocked).apply()
+        val editor = prefs(context).edit().putBoolean(KEY_PRO_UNLOCKED, unlocked)
+        if (!unlocked) {
+            editor.putLong(KEY_PRO_AD_EXPIRY_MS, 0L)
+            editor.putInt(KEY_ADS_WATCHED_COUNT, 0)
+            _proAdExpiryMs.value = 0L
+            _adsWatchedCount.value = 0
+        }
+        editor.apply()
         _isProUnlocked.value = unlocked
     }
 
-    fun isBlockAllApkEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_BLOCK_ALL_APK, true)
+    /**
+     * Stacks +24 hours of Pro Shield every time the user watches 1 Rewarded Video Ad.
+     * Watch 1 ad -> 1 day (23:59:59). Watch 5 ads -> 5 full days of Pro Shield!
+     */
+    fun addRewardedAdProHours(context: Context, hours: Int = 24) {
+        val now = System.currentTimeMillis()
+        val currentBase = maxOf(now, _proAdExpiryMs.value)
+        val newExpiry = currentBase + (hours * 3600_000L)
+        val newAdsCount = _adsWatchedCount.value + 1
+
+        prefs(context).edit()
+            .putLong(KEY_PRO_AD_EXPIRY_MS, newExpiry)
+            .putInt(KEY_ADS_WATCHED_COUNT, newAdsCount)
+            .apply()
+
+        _proAdExpiryMs.value = newExpiry
+        _adsWatchedCount.value = newAdsCount
+        _isProUnlocked.value = true
+    }
+
+    fun refreshProStatus(context: Context) {
+        val p = prefs(context)
+        val isPaidSub = p.getBoolean(KEY_PRO_UNLOCKED, false)
+        val adActive = System.currentTimeMillis() < _proAdExpiryMs.value
+        _isProUnlocked.value = isPaidSub || adActive
+    }
+
+    fun formatRemainingProTime(remainingMs: Long): String {
+        if (remainingMs <= 0L) return "00:00:00"
+        val totalSeconds = remainingMs / 1000L
+        val days = totalSeconds / 86400L
+        val hours = (totalSeconds % 86400L) / 3600L
+        val minutes = (totalSeconds % 3600L) / 60L
+        val seconds = totalSeconds % 60L
+        return if (days > 0L) {
+            String.format("%dd %02dh %02dm", days, hours, minutes)
+        } else {
+            String.format("%02d:%02d:%02d", hours, minutes, seconds)
+        }
+    }
+
+    fun formatRemainingProTimeVerbose(remainingMs: Long): String {
+        if (remainingMs <= 0L) return "0 Mins"
+        val totalSeconds = remainingMs / 1000L
+        val days = totalSeconds / 86400L
+        val hours = (totalSeconds % 86400L) / 3600L
+        val minutes = (totalSeconds % 3600L) / 60L
+        val seconds = totalSeconds % 60L
+        return if (days > 0L) {
+            val dayLabel = if (days == 1L) "1 Day" else "$days Days"
+            val hourLabel = if (hours == 1L) "1 Hour" else "$hours Hours"
+            val minLabel = if (minutes == 1L) "1 Min" else "$minutes Mins"
+            "$dayLabel $hourLabel $minLabel"
+        } else {
+            val hourLabel = if (hours == 1L) "1 Hour" else "$hours Hours"
+            val minLabel = if (minutes == 1L) "1 Min" else "$minutes Mins"
+            val secLabel = if (seconds == 1L) "1 Sec" else "$seconds Secs"
+            "$hourLabel $minLabel $secLabel"
+        }
+    }
+
+    /**
+     * Allows the user to intentionally install their own APK for 2 minutes when they choose
+     * "Take Risk & Allow Install" on the warning screen, then automatically re-locks protection.
+     */
+    fun grantTemporaryInstallBypass(durationMinutes: Int = 2) {
+        temporaryBypassUntilMs = System.currentTimeMillis() + (durationMinutes * 60 * 1000L)
+    }
+
+    fun isTemporaryBypassActive(): Boolean =
+        System.currentTimeMillis() < temporaryBypassUntilMs
+
+    fun isBlockAllApkEnabled(context: Context): Boolean {
+        if (isTemporaryBypassActive()) return false
+        return prefs(context).getBoolean(KEY_BLOCK_ALL_APK, true)
+    }
 
     fun setBlockAllApkEnabled(context: Context, enabled: Boolean) =
         prefs(context).edit().putBoolean(KEY_BLOCK_ALL_APK, enabled).apply()
@@ -68,8 +177,10 @@ object ShieldRepository {
     fun setBlockUnknownSourcesSettingsEnabled(context: Context, enabled: Boolean) =
         prefs(context).edit().putBoolean(KEY_BLOCK_UNKNOWN_SOURCES_SETTINGS, enabled).apply()
 
-    fun isAutoDeleteDownloadedApks(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_AUTO_DELETE_DOWNLOADED_APKS, true)
+    fun isAutoDeleteDownloadedApks(context: Context): Boolean {
+        if (isTemporaryBypassActive()) return false
+        return prefs(context).getBoolean(KEY_AUTO_DELETE_DOWNLOADED_APKS, false)
+    }
 
     fun setAutoDeleteDownloadedApks(context: Context, enabled: Boolean) =
         prefs(context).edit().putBoolean(KEY_AUTO_DELETE_DOWNLOADED_APKS, enabled).apply()

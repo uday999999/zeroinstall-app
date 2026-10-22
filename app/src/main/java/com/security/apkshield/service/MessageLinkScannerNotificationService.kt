@@ -64,9 +64,9 @@ class MessageLinkScannerNotificationService : NotificationListenerService() {
                 type = ThreatType.MALICIOUS_LINK_BLOCKED,
                 severity = Severity.CRITICAL,
                 sourcePackageOrUrl = "App: $pkg | Sender: $title",
-                title = "🚨 Incoming APK File / Link Detected in Message!",
-                description = "A message from '$title' in '$pkg' contains an APK file or link:\n\"$text\"\n\nDo NOT open or install this file—it may install a background tracker or banking trojan.",
-                actionTaken = "Displayed Immediate Security Warning",
+                title = "🚨 HIGH ALERT: Hidden APK Detected in Message Link!",
+                description = "A message from '$title' in '$pkg' contains a hidden APK file or link:\n\"$text\"\n\nDo NOT open or install this file—it may secretly install spyware or a banking trojan.",
+                actionTaken = "HIGH ALERT Warning Displayed — Link Blocked",
                 showFullScreenPopup = true
             )
             return
@@ -91,9 +91,9 @@ class MessageLinkScannerNotificationService : NotificationListenerService() {
                         type = ThreatType.MALICIOUS_LINK_BLOCKED,
                         severity = Severity.CRITICAL,
                         sourcePackageOrUrl = "Message in $pkg ($title) → $url",
-                        title = "🛑 Malicious / Hidden APK Link Blocked in Message!",
-                        description = "Sender '$title' sent a dangerous link ($url).\n\nReasons:\n${finalScan.reasons.joinToString("\n• ", prefix = "• ")}",
-                        actionTaken = "Link Flagged & User Alerted Before Click",
+                        title = "🚨 HIGH ALERT: Hidden APK Detected in Link!",
+                        description = "Sender '$title' sent a dangerous link containing a hidden APK or phishing payload ($url).\n\nReasons:\n${finalScan.reasons.joinToString("\n• ", prefix = "• ")}",
+                        actionTaken = "HIGH ALERT — Hidden APK Link Strictly Blocked",
                         showFullScreenPopup = true
                     )
                     break
