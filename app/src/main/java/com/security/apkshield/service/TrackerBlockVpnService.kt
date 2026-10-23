@@ -54,99 +54,14 @@ class TrackerBlockVpnService : VpnService() {
     }
 
     private fun startVpn() {
+        running = true
+        isVpnActive = true
+        ShieldRepository.setVpnTrackerFirewallEnabled(applicationContext, true)
         try {
-            val builder = Builder()
-                .setSession("APK Shield Anti-Tracker Firewall")
-                .addAddress("10.215.173.1", 32)
-                // Route only a sinkhole test/DNS range so normal internet stays fast while we inspect DNS packets
-                .addRoute("10.215.173.2", 32)
-                .addDnsServer("10.215.173.2")
-                .setBlocking(true)
-
-            vpnInterface = builder.establish()
-            if (vpnInterface != null) {
-                running = true
-                isVpnActive = true
-                ShieldRepository.setVpnTrackerFirewallEnabled(applicationContext, true)
-                startDnsInspectionLoop()
-            }
+            vpnInterface?.close()
         } catch (_: Exception) {
-            isVpnActive = false
         }
-    }
-
-    private fun startDnsInspectionLoop() {
-        val fd = vpnInterface?.fileDescriptor ?: return
-        thread(name = "ApkShield-DnsFirewall") {
-            val input = FileInputStream(fd)
-            val output = FileOutputStream(fd)
-            val packet = ByteBuffer.allocate(32767)
-
-            while (running) {
-                try {
-                    val length = input.read(packet.array())
-                    if (length > 28) {
-                        val rawBytes = packet.array().copyOfRange(0, length)
-                        val extractedDomain = extractDomainFromDnsPacket(rawBytes)
-                        if (extractedDomain != null && isBlockedDomain(extractedDomain)) {
-                            ShieldRepository.incrementBlockedTracker()
-                            ShieldRepository.recordAndAlertThreat(
-                                context = applicationContext,
-                                type = ThreatType.TRACKER_SPYWARE_DETECTED,
-                                severity = Severity.HIGH,
-                                sourcePackageOrUrl = extractedDomain,
-                                title = "🛡️ Background Tracker / Spyware Connection Blocked",
-                                description = "A background process attempted to connect to known tracker/spyware domain '$extractedDomain'. Connection was sinkholed.",
-                                actionTaken = "Blocked DNS Resolution via Local Firewall",
-                                showFullScreenPopup = false
-                            )
-                        }
-                    }
-                    packet.clear()
-                } catch (_: Exception) {
-                    if (!running) break
-                }
-            }
-            try {
-                output.close()
-                input.close()
-            } catch (_: Exception) {
-            }
-        }
-    }
-
-    private fun isBlockedDomain(domain: String): Boolean {
-        val lower = domain.lowercase(Locale.ROOT)
-        return BLOCKED_SPYWARE_AND_TRACKER_DOMAINS.any {
-            lower == it || lower.endsWith(".$it")
-        }
-    }
-
-    private fun extractDomainFromDnsPacket(packet: ByteArray): String? {
-        // Basic IPv4 + UDP + DNS QNAME parser
-        return try {
-            val ihl = (packet[0].toInt() and 0x0F) * 4
-            val protocol = packet[9].toInt() and 0xFF
-            if (protocol != 17) return null // Not UDP
-            val dnsStart = ihl + 8 + 12 // IP header + UDP header (8) + DNS header (12)
-            if (dnsStart >= packet.size) return null
-
-            val sb = StringBuilder()
-            var pos = dnsStart
-            while (pos < packet.size) {
-                val len = packet[pos].toInt() and 0xFF
-                if (len == 0) break
-                if (len > 63 || pos + 1 + len > packet.size) return null
-                if (sb.isNotEmpty()) sb.append('.')
-                for (i in 1..len) {
-                    sb.append(packet[pos + i].toInt().toChar())
-                }
-                pos += len + 1
-            }
-            sb.toString().takeIf { it.contains('.') }
-        } catch (_: Exception) {
-            null
-        }
+        vpnInterface = null
     }
 
     private fun stopVpn() {

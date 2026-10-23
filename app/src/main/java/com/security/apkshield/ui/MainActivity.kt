@@ -1551,16 +1551,11 @@ fun ShieldDashboardTab(
                         context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
                     }
                     ProminentDisclosureType.VPN_FIREWALL -> {
-                        val prepare = VpnService.prepare(context)
-                        if (prepare != null) {
-                            vpnLauncher.launch(prepare)
-                        } else {
-                            val startIntent = Intent(context, TrackerBlockVpnService::class.java).apply {
-                                action = TrackerBlockVpnService.ACTION_START
-                            }
-                            context.startService(startIntent)
-                            isVpnRunning = true
+                        val startIntent = Intent(context, TrackerBlockVpnService::class.java).apply {
+                            action = TrackerBlockVpnService.ACTION_START
                         }
+                        context.startService(startIntent)
+                        isVpnRunning = true
                     }
                     ProminentDisclosureType.DEVICE_ADMIN -> {
                         val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
